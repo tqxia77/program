@@ -1,41 +1,64 @@
 /**
  * 银龄乐圈 - 活动详情页
  * 展示活动详细信息，支持一键报名
+ * 数据从后端 API 获取
  */
 
 import { useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { Calendar, MapPin, Users, ChevronLeft, Loader } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { mockActivities, getSignedActivityIds, saveSignedActivityId, type Activity } from '../../store/mock-data'
+import { Network } from '@/network'
+import { getSignedActivityIds, saveSignedActivityId, removeSignedActivityId, type Activity } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
 import { useFontMode } from '../../store/font-mode'
 
 export default function ActivityDetail() {
   const [activity, setActivity] = useState<Activity | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
   const [isSigned, setIsSigned] = useState(false)
   const { fontMode } = useFontMode()
   const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
+  // 加载活动详情
   useEffect(() => {
-    // 获取活动ID
-    const currentPage = Taro.getCurrentPages().pop() as any
-    const activityId = currentPage?.options?.id
+    const loadActivityDetail = async () => {
+      const currentPage = Taro.getCurrentPages().pop() as any
+      const activityId = currentPage?.options?.id
 
-    if (activityId) {
-      const found = mockActivities.find(a => a.id === activityId)
-      if (found) {
-        // 检查是否已报名
-        const signedIds = getSignedActivityIds()
-        setIsSigned(signedIds.includes(activityId))
-        setActivity({
-          ...found,
-          status: signedIds.includes(activityId) ? 'signed' : found.status
-        })
+      if (activityId) {
+        setIsLoading(true)
+        try {
+          console.log('[ActivityDetail] 加载活动详情:', activityId)
+          const res = await Network.request({
+            url: `/api/activities/${activityId}`,
+            method: 'GET'
+          })
+          console.log('[ActivityDetail] 响应:', res.data)
+
+          if (res.data?.code === 200) {
+            const data = res.data.data
+            
+            // 检查是否已报名
+            const signedIds = getSignedActivityIds()
+            const signed = signedIds.includes(activityId)
+            
+            setIsSigned(signed)
+            setActivity({
+              ...data,
+              status: signed ? 'signed' : data.status
+            })
+          }
+        } catch (error) {
+          console.error('[ActivityDetail] 加载失败:', error)
+          Taro.showToast({ title: '加载失败', icon: 'none' })
+        } finally {
+          setIsLoading(false)
+        }
       }
     }
+
+    loadActivityDetail()
   }, [])
 
   // 一键报名
@@ -44,21 +67,69 @@ export default function ActivityDetail() {
 
     setIsLoading(true)
 
-    // 模拟网络请求延迟 1 秒
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      console.log('[ActivityDetail] 报名活动:', activity.id)
+      const res = await Network.request({
+        url: `/api/activities/${activity.id}/enroll`,
+        method: 'POST'
+      })
+      console.log('[ActivityDetail] 报名响应:', res.data)
 
-    // 保存到本地存储
-    saveSignedActivityId(activity.id)
+      if (res.data?.code === 200) {
+        // 保存到本地存储
+        saveSignedActivityId(activity.id)
 
-    setIsLoading(false)
-    setShowSuccess(true)
-    setIsSigned(true)
-    setActivity(prev => prev ? { ...prev, status: 'signed' } : null)
+        setIsSigned(true)
+        setActivity(prev => prev ? { ...prev, status: 'signed', enrolled: res.data.data.enrolled } : null)
 
-    // 2秒后关闭成功提示
-    setTimeout(() => {
-      setShowSuccess(false)
-    }, 2000)
+        Taro.showToast({ title: '报名成功', icon: 'success' })
+      }
+    } catch (error) {
+      console.error('[ActivityDetail] 报名失败:', error)
+      Taro.showToast({ title: '报名失败', icon: 'none' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 取消报名
+  const handleCancelSignUp = async () => {
+    if (!activity || !isSigned) return
+
+    Taro.showModal({
+      title: '取消报名',
+      content: '确定要取消报名吗？',
+      confirmText: '确定取消',
+      cancelText: '保留报名',
+      success: async (res) => {
+        if (res.confirm) {
+          setIsLoading(true)
+          try {
+            console.log('[ActivityDetail] 取消报名:', activity.id)
+            const result = await Network.request({
+              url: `/api/activities/${activity.id}/cancel`,
+              method: 'POST'
+            })
+            console.log('[ActivityDetail] 取消响应:', result.data)
+
+            if (result.data?.code === 200) {
+              // 从本地存储移除
+              removeSignedActivityId(activity.id)
+
+              setIsSigned(false)
+              setActivity(prev => prev ? { ...prev, status: 'available', enrolled: result.data.data.enrolled } : null)
+
+              Taro.showToast({ title: '已取消报名', icon: 'success' })
+            }
+          } catch (error) {
+            console.error('[ActivityDetail] 取消失败:', error)
+            Taro.showToast({ title: '操作失败', icon: 'none' })
+          } finally {
+            setIsLoading(false)
+          }
+        }
+      }
+    })
   }
 
   // 返回上一页
@@ -81,18 +152,21 @@ export default function ActivityDetail() {
 
     if (isSigned) {
       return (
-        <View className="flex-1 flex items-center justify-center bg-muted rounded-xl py-4">
+        <View 
+          className="flex-1 flex items-center justify-center bg-white border-2 border-success rounded-xl py-4"
+          onClick={handleCancelSignUp}
+        >
           <View className="w-6 h-6 rounded-full bg-success flex items-center justify-center mr-2">
             <Text className="block text-white text-sm">&#10003;</Text>
           </View>
-          <Text className="block text-muted-foreground text-xl font-bold">已报名</Text>
+          <Text className="block text-success text-xl font-bold">已报名（点击取消）</Text>
         </View>
       )
     }
 
     if (activity?.status === 'full') {
       return (
-        <View className="flex-1 flex items-center justify-center bg-warning rounded-xl py-4">
+        <View className="flex-1 flex items-center justify-center bg-muted-foreground rounded-xl py-4">
           <Text className="block text-white text-xl font-bold">名额已满</Text>
         </View>
       )
@@ -108,6 +182,14 @@ export default function ActivityDetail() {
     )
   }
 
+  if (isLoading && !activity) {
+    return (
+      <View className="flex items-center justify-center h-screen">
+        <Text className="block text-base text-muted-foreground">加载中...</Text>
+      </View>
+    )
+  }
+
   if (!activity) {
     return (
       <View className="flex items-center justify-center h-screen">
@@ -115,6 +197,9 @@ export default function ActivityDetail() {
       </View>
     )
   }
+
+  // 计算剩余名额
+  const remaining = (activity.capacity || 0) - (activity.enrolled || 0)
 
   return (
     <View className={`min-h-screen bg-background ${fontModeClass}`}>
@@ -148,129 +233,78 @@ export default function ActivityDetail() {
           />
           <View className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black bg-opacity-60 to-transparent p-4">
             <Text className="block text-white text-2xl font-bold">{activity.title}</Text>
-            <View className="flex items-center gap-2 mt-2">
-              <View className="bg-white bg-opacity-20 rounded-full px-3 py-1">
-                <Text className="block text-white text-sm">{activity.category}</Text>
+          </View>
+        </View>
+
+        {/* 活动信息卡片 */}
+        <View className="px-4 -mt-6 relative z-10">
+          <View className="bg-white rounded-2xl card-shadow p-5">
+            {/* 基本信息 */}
+            <View className="flex items-start gap-4 mb-4 pb-4 border-b border-border">
+              <View className="bg-primary-light rounded-full px-4 py-2">
+                <Text className="block text-primary text-base font-medium">{activity.category}</Text>
               </View>
-              {isSigned && (
-                <View className="bg-primary rounded-full px-3 py-1">
-                  <Text className="block text-white text-sm">已报名</Text>
-                </View>
-              )}
-            </View>
-          </View>
-        </View>
-
-        {/* 活动基本信息 */}
-        <View className="p-4 bg-white m-4 rounded-2xl card-shadow">
-          <View className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
-            <Calendar color="#FF6B00" size={28} />
-            <View>
-              <Text className="block text-lg text-foreground font-medium">{activity.date}</Text>
-              <Text className="block text-base text-muted-foreground">{activity.time}</Text>
-            </View>
-          </View>
-
-          <View className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
-            <MapPin color="#FF6B00" size={28} />
-            <View className="flex-1">
-              <Text className="block text-lg text-foreground font-medium">活动地点</Text>
-              <Text className="block text-base text-muted-foreground">{activity.location}</Text>
-            </View>
-          </View>
-
-          <View className="flex items-center gap-3">
-            <Users color="#FF6B00" size={28} />
-            <View className="flex-1">
-              <Text className="block text-lg text-foreground font-medium">报名情况</Text>
-              <Text className="block text-base text-muted-foreground">
-                已报名 {activity.enrolled}/{activity.capacity} 人
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 活动详情说明 */}
-        <View className="p-4 bg-white m-4 rounded-2xl card-shadow">
-          <Text className="block text-xl font-bold text-foreground mb-4">活动详情</Text>
-          <View className="leading-relaxed">
-            {activity.description.split('\n').map((line, index) => {
-              // 处理标题行
-              if (line.startsWith('【') && line.endsWith('】')) {
-                return (
-                  <Text 
-                    key={index} 
-                    className="block text-lg font-bold text-primary mt-4 mb-2"
-                  >
-                    {line}
-                  </Text>
-                )
-              }
-              // 处理emoji开头的行
-              if (/^[\u4e00-\u9fa5]/.test(line) && /[📖🎁👨‍🏫📍🅿️🧘📋🍵👨‍⚕️🎯📢💻💡🔔⚠️]/.test(line)) {
-                return (
-                  <Text 
-                    key={index} 
-                    className="block text-lg font-semibold text-foreground mt-3 mb-1"
-                  >
-                    {line}
-                  </Text>
-                )
-              }
-              // 处理emoji符号开头的内容
-              if (/^[📖🎁👨‍🏫📍🅿️🧘📋🍵👨‍⚕️🎯📢💻💡🔔⚠️1️⃣2️⃣3️⃣4️⃣5️⃣]/.test(line)) {
-                return (
-                  <Text 
-                    key={index} 
-                    className="block text-base text-foreground leading-loose"
-                  >
-                    {line}
-                  </Text>
-                )
-              }
-              // 普通文本
-              return (
-                <Text 
-                  key={index} 
-                  className="block text-base text-foreground leading-loose"
-                >
-                  {line}
+              <View className="flex-1">
+                <Text className="block text-lg text-muted-foreground">
+                  剩余 {remaining} / {activity.capacity} 名额
                 </Text>
-              )
-            })}
+              </View>
+            </View>
+
+            <View className="flex items-center gap-3 mb-3">
+              <Calendar color="#FF6B00" size={24} />
+              <Text className="block text-lg text-foreground">{activity.date}</Text>
+            </View>
+
+            <View className="flex items-center gap-3 mb-3">
+              <MapPin color="#FF6B00" size={24} />
+              <Text className="block text-lg text-foreground">{activity.location}</Text>
+            </View>
+
+            <View className="flex items-center gap-3">
+              <Users color="#FF6B00" size={24} />
+              <Text className="block text-lg text-foreground">{activity.time}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 活动详情 */}
+        <View className="px-4 mt-4">
+          <View className="bg-white rounded-2xl card-shadow p-5">
+            <Text className="block text-xl font-bold text-foreground mb-4">活动详情</Text>
+            <Text className="block text-base text-foreground leading-relaxed whitespace-pre-wrap">
+              {activity.description}
+            </Text>
           </View>
         </View>
 
         {/* 底部留白 */}
-        <View className="h-24" />
+        <View className="h-8" />
       </ScrollView>
 
       {/* 底部报名栏 */}
       <View 
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-border p-4 z-40"
-        style={{ paddingBottom: Taro.getStorageSync('safeAreaBottom') + 'px' }}
+        className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-4 py-4 z-50"
+        style={{ paddingBottom: 'calc(4px + env(safe-area-inset-bottom))' }}
       >
         <View className="flex items-center gap-4">
-          {renderSignUpButton()}
-        </View>
-      </View>
-
-      {/* 报名成功提示 */}
-      {showSuccess && (
-        <View className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <View className="bg-white rounded-3xl p-8 flex flex-col items-center mx-8">
-            <View className="w-20 h-20 bg-success bg-opacity-10 rounded-full flex items-center justify-center mb-4">
-              <View className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
-                <Text className="block text-white text-2xl">&#10003;</Text>
-              </View>
-            </View>
-            <Text className="block text-2xl font-bold text-foreground mb-2">报名成功！</Text>
-            <Text className="block text-lg text-muted-foreground text-center">
-              我们已将您添加到报名名单中{'\n'}期待您的参与！
-            </Text>
+          {/* 报名信息 */}
+          <View className="flex flex-col items-center">
+            <Text className="block text-2xl font-bold text-primary">{activity.enrolled || 0}</Text>
+            <Text className="block text-sm text-muted-foreground">已报名</Text>
+          </View>
+          <View className="w-px h-12 bg-border" />
+          <View className="flex flex-col items-center">
+            <Text className="block text-2xl font-bold text-muted-foreground">{remaining}</Text>
+            <Text className="block text-sm text-muted-foreground">剩余名额</Text>
+          </View>
+          
+          {/* 报名按钮 */}
+          <View className="flex-1 ml-4">
+            {renderSignUpButton()}
           </View>
         </View>
-      )}
+      </View>
     </View>
   )
 }

@@ -7,7 +7,9 @@ const config: any = {
     'pages/activity-detail/index',
     'pages/publish/index',
     'pages/edit-profile/index',
-    'pages/child-binding/index'
+    'pages/child-binding/index',
+    'pages/admin/activities/index',
+    'pages/admin/activities/publish'
   ],
   window: {
     backgroundTextStyle: 'light',
