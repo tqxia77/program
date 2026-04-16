@@ -140,7 +140,7 @@ export default function Profile() {
               className="w-28 h-28 rounded-full"
               mode="aspectFill"
             />
-            <View className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-2 border-white" />
+
           </View>
           <View className="ml-4 flex-1">
             <Text className="block text-3xl font-bold text-white">{userName}</Text>

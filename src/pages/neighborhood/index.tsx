@@ -186,6 +186,7 @@ export default function Neighborhood() {
                 <Heart 
                   size={24} 
                   color={likedIds.includes(post.id) ? '#FF6B00' : '#666666'}
+                  filled={likedIds.includes(post.id)}
                 />
                 <Text className={`block text-lg ${
                   likedIds.includes(post.id) 
