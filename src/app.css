@@ -66,14 +66,14 @@ root-portal {
   --radius-xl: 24px;
   --radius-full: 9999px;
   
-  /* 适老化字号 */
-  --text-xs: 14px;
-  --text-sm: 16px;
-  --text-base: 18px;
-  --text-lg: 20px;
-  --text-xl: 24px;
-  --text-2xl: 28px;
-  --text-3xl: 32px;
+  /* 适老化字号 - 进一步放大便于老年人阅读 */
+  --text-xs: 16px;
+  --text-sm: 18px;
+  --text-base: 20px;
+  --text-lg: 22px;
+  --text-xl: 26px;
+  --text-2xl: 30px;
+  --text-3xl: 36px;
   
   /* 侧边栏 */
   --sidebar: #FFFBF7;
@@ -112,51 +112,51 @@ view, text {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 适老化通用按钮样式 */
+/* 适老化通用按钮样式 - 进一步放大 */
 .btn-primary {
   background-color: #FF6B00 !important;
   color: white !important;
   border: none !important;
-  font-size: 18px !important;
+  font-size: 20px !important;
   font-weight: 600 !important;
-  border-radius: 12px !important;
-  padding: 12px 24px !important;
-  min-height: 48px !important;
+  border-radius: 16px !important;
+  padding: 16px 32px !important;
+  min-height: 56px !important;
 }
 
 .btn-secondary {
   background-color: #FFF4E6 !important;
   color: #FF6B00 !important;
   border: 2px solid #FF6B00 !important;
-  font-size: 18px !important;
+  font-size: 20px !important;
   font-weight: 500 !important;
-  border-radius: 12px !important;
-  padding: 12px 24px !important;
-  min-height: 48px !important;
+  border-radius: 16px !important;
+  padding: 16px 32px !important;
+  min-height: 56px !important;
 }
 
 .btn-disabled {
   background-color: #E0E0E0 !important;
   color: #999999 !important;
   border: none !important;
-  font-size: 18px !important;
-  border-radius: 12px !important;
-  padding: 12px 24px !important;
-  min-height: 48px !important;
+  font-size: 20px !important;
+  border-radius: 16px !important;
+  padding: 16px 32px !important;
+  min-height: 56px !important;
 }
 
 /* 悬浮按钮 */
 .fab-button {
-  width: 64px !important;
-  height: 64px !important;
-  border-radius: 32px !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 36px !important;
   background-color: #FF6B00 !important;
   color: white !important;
-  font-size: 32px !important;
+  font-size: 36px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.5) !important;
 }
 
 /* 卡片阴影 */
@@ -164,29 +164,29 @@ view, text {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* 状态标签 */
+/* 状态标签 - 放大便于阅读 */
 .badge-available {
   background-color: #4CAF50 !important;
   color: white !important;
-  font-size: 14px !important;
-  padding: 4px 12px !important;
-  border-radius: 20px !important;
+  font-size: 16px !important;
+  padding: 6px 16px !important;
+  border-radius: 24px !important;
 }
 
 .badge-full {
   background-color: #FF9800 !important;
   color: white !important;
-  font-size: 14px !important;
-  padding: 4px 12px !important;
-  border-radius: 20px !important;
+  font-size: 16px !important;
+  padding: 6px 16px !important;
+  border-radius: 24px !important;
 }
 
 .badge-signed {
   background-color: #9E9E9E !important;
   color: white !important;
-  font-size: 14px !important;
-  padding: 4px 12px !important;
-  border-radius: 20px !important;
+  font-size: 16px !important;
+  padding: 6px 16px !important;
+  border-radius: 24px !important;
 }
 
 /* 暗色模式适配 */

@@ -81,17 +81,17 @@ export default function Profile() {
         <View className="flex items-center">
           <View className="relative">
             <Image
-              src={userAvatar || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&q=80'}
-              className="w-24 h-24 rounded-full object-cover border-4 border-white border-opacity-30"
+              src={userAvatar || 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'}
+              className="w-28 h-28 rounded-full object-cover border-4 border-white border-opacity-30"
               mode="aspectFill"
             />
             <View className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-2 border-white" />
           </View>
           <View className="ml-4 flex-1">
-            <Text className="block text-2xl font-bold text-white">{userName}</Text>
+            <Text className="block text-3xl font-bold text-white">{userName}</Text>
             <View className="flex items-center gap-2 mt-2">
-              <View className="bg-white bg-opacity-20 rounded-full px-3 py-1">
-                <Text className="block text-white text-sm">银龄乐圈会员</Text>
+              <View className="bg-white bg-opacity-20 rounded-full px-4 py-2">
+                <Text className="block text-white text-base">银龄乐圈会员</Text>
               </View>
             </View>
           </View>
@@ -101,47 +101,47 @@ export default function Profile() {
       {/* 我的报名区域 */}
       <View className="px-4 -mt-6">
         <View className="bg-white rounded-2xl card-shadow overflow-hidden">
-          <View className="flex items-center justify-between px-4 py-4 border-b border-border">
+          <View className="flex items-center justify-between px-5 py-5 border-b border-border">
             <View className="flex items-center gap-3">
-              <Calendar color="#FF6B00" size={24} />
+              <Calendar color="#FF6B00" size={26} />
               <Text className="block text-xl font-bold text-foreground">我的报名</Text>
-              <View className="bg-primary bg-opacity-10 rounded-full px-2 py-1">
-                <Text className="block text-primary text-sm font-medium">{signedActivities.length}</Text>
+              <View className="bg-primary bg-opacity-10 rounded-full px-3 py-1">
+                <Text className="block text-primary text-base font-medium">{signedActivities.length}</Text>
               </View>
             </View>
           </View>
 
           {signedActivities.length > 0 ? (
-            <View className="px-4 pb-4">
+            <View className="px-5 pb-5">
               {signedActivities.map((activity) => (
                 <View 
                   key={activity.id}
-                  className="flex items-center gap-3 py-3 border-b border-border last:border-0"
+                  className="flex items-center gap-4 py-4 border-b border-border last:border-0"
                 >
                   <Image
                     src={activity.imageUrl}
-                    className="w-16 h-16 rounded-xl object-cover"
+                    className="w-20 h-20 rounded-xl object-cover"
                     mode="aspectFill"
                   />
                   <View className="flex-1 min-w-0">
                     <Text className="block text-lg font-medium text-foreground truncate">
                       {activity.title}
                     </Text>
-                    <Text className="block text-sm text-muted-foreground mt-1">
-                      {activity.date} | {activity.location.split('（')[0]}
+                    <Text className="block text-base text-muted-foreground mt-1">
+                      {activity.date}
                     </Text>
                   </View>
-                  <View className="bg-success bg-opacity-10 rounded-full px-3 py-1">
-                    <Text className="block text-success text-sm font-medium">已报名</Text>
+                  <View className="bg-success bg-opacity-10 rounded-full px-4 py-2">
+                    <Text className="block text-success text-base font-medium">已报名</Text>
                   </View>
                 </View>
               ))}
             </View>
           ) : (
-            <View className="px-4 py-8 flex flex-col items-center">
-              <Calendar color="#CCCCCC" size={48} />
-              <Text className="block text-lg text-muted-foreground mt-3">暂无报名活动</Text>
-              <Text className="block text-sm text-muted-foreground mt-1">快去活动中心看看吧</Text>
+            <View className="px-5 py-10 flex flex-col items-center">
+              <Calendar color="#CCCCCC" size={56} />
+              <Text className="block text-lg text-muted-foreground mt-4">暂无报名活动</Text>
+              <Text className="block text-base text-muted-foreground mt-2">快去活动中心看看吧</Text>
             </View>
           )}
         </View>
@@ -152,19 +152,19 @@ export default function Profile() {
         <View className="bg-white rounded-2xl card-shadow overflow-hidden">
           {menuItems.map((item, index) => (
             <View key={item.id}>
-              {index > 0 && <View className="h-px bg-border mx-4" />}
+              {index > 0 && <View className="h-px bg-border mx-5" />}
               <View 
-                className="flex items-center justify-between px-4 py-4 active:bg-secondary"
+                className="flex items-center justify-between px-5 py-5 active:bg-secondary"
                 onClick={item.action}
               >
-                <View className="flex items-center gap-3">
-                  <View className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                    <item.icon color="#FF6B00" size={22} />
+                <View className="flex items-center gap-4">
+                  <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                    <item.icon color="#FF6B00" size={24} />
                   </View>
-                  <Text className="block text-lg text-foreground">{item.title}</Text>
+                  <Text className="block text-xl text-foreground">{item.title}</Text>
                 </View>
-                <View className="w-6 h-6 flex items-center justify-center">
-                  <Text className="text-muted-foreground text-lg">&#8250;</Text>
+                <View className="w-8 h-8 flex items-center justify-center">
+                  <Text className="text-muted-foreground text-2xl">›</Text>
                 </View>
               </View>
             </View>
@@ -176,45 +176,45 @@ export default function Profile() {
       <View className="px-4 mt-4">
         <View className="bg-white rounded-2xl card-shadow overflow-hidden">
           <View 
-            className="flex items-center justify-between px-4 py-4 active:bg-secondary"
+            className="flex items-center justify-between px-5 py-5 active:bg-secondary"
             onClick={handleFontSizeAdjust}
           >
-            <View className="flex items-center gap-3">
-              <View className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                <Type color="#FF6B00" size={22} />
+            <View className="flex items-center gap-4">
+              <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                <Type color="#FF6B00" size={24} />
               </View>
               <View>
-                <Text className="block text-lg text-foreground">大字体模式</Text>
-                <Text className="block text-sm text-muted-foreground mt-1">点击体验适老化大字效果</Text>
+                <Text className="block text-xl text-foreground">大字体模式</Text>
+                <Text className="block text-base text-muted-foreground mt-1">点击体验适老化大字效果</Text>
               </View>
             </View>
-            <View className="w-6 h-6 flex items-center justify-center">
-              <Text className="text-muted-foreground text-lg">&#8250;</Text>
+            <View className="w-8 h-8 flex items-center justify-center">
+              <Text className="text-muted-foreground text-2xl">›</Text>
             </View>
           </View>
 
-          <View className="h-px bg-border mx-4" />
+          <View className="h-px bg-border mx-5" />
 
-          <View className="flex items-center justify-between px-4 py-4">
-            <View className="flex items-center gap-3">
-              <View className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                <Bell color="#FF6B00" size={22} />
+          <View className="flex items-center justify-between px-5 py-5">
+            <View className="flex items-center gap-4">
+              <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                <Bell color="#FF6B00" size={24} />
               </View>
               <View>
-                <Text className="block text-lg text-foreground">消息通知</Text>
-                <Text className="block text-sm text-muted-foreground mt-1">活动报名、活动提醒</Text>
+                <Text className="block text-xl text-foreground">消息通知</Text>
+                <Text className="block text-base text-muted-foreground mt-1">活动报名、活动提醒</Text>
               </View>
             </View>
-            <View className="bg-primary rounded-full px-3 py-1">
-              <Text className="block text-white text-sm font-medium">已开启</Text>
+            <View className="bg-primary rounded-full px-4 py-2">
+              <Text className="block text-white text-base font-medium">已开启</Text>
             </View>
           </View>
         </View>
       </View>
 
       {/* 版本信息 */}
-      <View className="mt-8 flex justify-center">
-        <Text className="block text-sm text-muted-foreground">银龄乐圈 v1.0.0</Text>
+      <View className="mt-10 flex justify-center">
+        <Text className="block text-base text-muted-foreground">银龄乐圈 v1.0.0</Text>
       </View>
 
       {/* 底部留白 */}

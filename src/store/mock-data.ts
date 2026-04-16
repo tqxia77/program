@@ -229,8 +229,8 @@ export const mockPosts: Post[] = [
     id: 'post001',
     userId: 'user001',
     userName: '王秀英',
-    userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-    content: '今天在太极拳晨练班学完了24式简化太极拳！老师教得很仔细，我终于把动作记住了。感觉身体暖暖的，精神也好了很多！感谢李老师耐心指导💪',
+    userAvatar: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=200&q=80',
+    content: '今天在太极拳晨练班学完了24式简化太极拳！老师教得很仔细，我终于把动作记住了。感觉身体暖暖的，精神也好了很多！感谢李老师耐心指导',
     images: [
       'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80',
       'https://images.unsplash.com/photo-1601581975053-7c199cd76688?w=600&q=80'
@@ -244,8 +244,8 @@ export const mockPosts: Post[] = [
     id: 'post002',
     userId: 'user002',
     userName: '张建国',
-    userAvatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&q=80',
-    content: '分享昨天防诈骗讲座学到的知识！昨天听了王警官的讲座，恍然大悟，原来骗子有这么多套路。现在我把几个关键点整理出来，大家一定要看：\n\n1️⃣ 凡是打电话说涉嫌违法的，都是骗子！\n2️⃣ 保健品治病是骗局，生病了要去医院！\n3️⃣ 高收益理财都是坑，血本无归的例子太多了！\n\n大家一定要记住，有疑问就打110咨询！',
+    userAvatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80',
+    content: '分享昨天防诈骗讲座学到的知识！昨天听了王警官的讲座，恍然大悟，原来骗子有这么多套路。现在我把几个关键点整理出来，大家一定要看：\n\n1、凡是打电话说涉嫌违法的，都是骗子！\n2、保健品治病是骗局，生病了要去医院！\n3、高收益理财都是坑，血本无归的例子太多了！\n\n大家一定要记住，有疑问就打110咨询！',
     images: [],
     publishTime: '昨天 15:30',
     likes: 56,
@@ -256,8 +256,8 @@ export const mockPosts: Post[] = [
     id: 'post003',
     userId: 'user003',
     userName: '李阿姨',
-    userAvatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&q=80',
-    content: '今天在书法班写的第一幅字，虽然还很稚嫩，但是很有成就感！张老师说我的握笔姿势很标准，进步很快😊\n\n有想学书法的邻居可以联系我，我们一起报名下期的课程！',
+    userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80',
+    content: '今天在书法班写的第一幅字，虽然还很稚嫩，但是很有成就感！张老师说我的握笔姿势很标准，进步很快\n\n有想学书法的邻居可以联系我，我们一起报名下期的课程！',
     images: [
       'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600&q=80'
     ],
@@ -275,7 +275,7 @@ export const mockPosts: Post[] = [
 export const defaultUserProfile: UserProfile = {
   id: 'my001',
   name: '银龄用户',
-  avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&q=80'
+  avatar: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'
 }
 
 // ============================================

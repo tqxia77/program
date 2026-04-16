@@ -94,19 +94,19 @@ export default function Publish() {
     <View className="min-h-screen bg-background flex flex-col">
       {/* 顶部导航栏 */}
       <View 
-        className="bg-white border-b border-border px-4"
+        className="bg-white border-b border-border px-5"
         style={{ paddingTop: statusBarHeight + 'px' }}
       >
-        <View className="flex items-center justify-between h-14">
+        <View className="flex items-center justify-between h-16">
           <View 
-            className="w-10 h-10 flex items-center justify-center rounded-full"
+            className="w-12 h-12 flex items-center justify-center rounded-full"
             onClick={handleGoBack}
           >
-            <ChevronLeft color="#333333" size={28} />
+            <ChevronLeft color="#333333" size={30} />
           </View>
-          <Text className="text-xl font-bold text-foreground">发布动态</Text>
+          <Text className="text-2xl font-bold text-foreground">发布动态</Text>
           <View 
-            className={`px-5 py-2 rounded-full text-lg font-medium ${
+            className={`px-6 py-3 rounded-full text-xl font-medium ${
               content.trim() 
                 ? 'bg-primary text-white' 
                 : 'bg-muted text-muted-foreground'
@@ -121,43 +121,43 @@ export default function Publish() {
       {/* 内容输入区 */}
       <ScrollView 
         scrollY 
-        className="flex-1 px-4 py-4"
+        className="flex-1 px-5 py-5"
       >
-        <View className="bg-white rounded-2xl p-4 card-shadow">
+        <View className="bg-white rounded-2xl p-5 card-shadow">
           <Textarea
             value={content}
             onInput={(e) => setContent((e.detail as any).value)}
             placeholder="分享今天的新鲜事..."
-            className="w-full min-h-48 text-lg text-foreground leading-relaxed bg-transparent"
+            className="w-full min-h-56 text-lg text-foreground leading-relaxed bg-transparent"
             maxlength={500}
           />
           
           {/* 字数统计 */}
-          <View className="flex justify-end mt-2">
-            <Text className="text-sm text-muted-foreground">
+          <View className="flex justify-end mt-3">
+            <Text className="text-base text-muted-foreground">
               {content.length}/500
             </Text>
           </View>
         </View>
 
         {/* 图片区域 */}
-        <View className="mt-4">
-          <Text className="block text-lg font-medium text-foreground mb-3">添加图片</Text>
+        <View className="mt-5">
+          <Text className="block text-xl font-medium text-foreground mb-4">添加图片</Text>
           
-          <View className="flex flex-wrap gap-3">
+          <View className="flex flex-wrap gap-4">
             {/* 已选择的图片 */}
             {images.map((img, index) => (
               <View key={index} className="relative">
                 <Image
                   src={img}
-                  className="w-24 h-24 rounded-xl object-cover"
+                  className="w-28 h-28 rounded-xl object-cover"
                   mode="aspectFill"
                 />
                 <View 
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-black bg-opacity-60 rounded-full flex items-center justify-center"
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-black bg-opacity-60 rounded-full flex items-center justify-center"
                   onClick={() => handleRemoveImage(index)}
                 >
-                  <X color="#FFFFFF" size={14} />
+                  <X color="#FFFFFF" size={16} />
                 </View>
               </View>
             ))}
@@ -165,11 +165,11 @@ export default function Publish() {
             {/* 添加图片按钮 */}
             {images.length < 9 && (
               <View 
-                className="w-24 h-24 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-white"
+                className="w-28 h-28 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-white"
                 onClick={handleChooseImage}
               >
-                <ImagePlus color="#999999" size={32} />
-                <Text className="block text-sm text-muted-foreground mt-1">
+                <ImagePlus color="#999999" size={36} />
+                <Text className="block text-base text-muted-foreground mt-2">
                   {images.length > 0 ? '继续添加' : '点击添加'}
                 </Text>
               </View>
@@ -178,16 +178,16 @@ export default function Publish() {
 
           {/* 图片数量提示 */}
           {images.length === 0 && (
-            <Text className="block text-sm text-muted-foreground mt-3">
+            <Text className="block text-base text-muted-foreground mt-4">
               最多可添加9张图片
             </Text>
           )}
         </View>
 
         {/* 发布按钮 */}
-        <View className="mt-8">
+        <View className="mt-10">
           <View 
-            className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 ${
+            className={`w-full py-5 rounded-2xl flex items-center justify-center gap-3 ${
               content.trim() 
                 ? 'bg-primary' 
                 : 'bg-muted'
@@ -196,12 +196,12 @@ export default function Publish() {
           >
             {isPublishing ? (
               <>
-                <Send color="#FFFFFF" size={24} />
+                <Send color="#FFFFFF" size={26} />
                 <Text className="block text-white text-xl font-bold">发布中...</Text>
               </>
             ) : (
               <>
-                <Send color={content.trim() ? '#FFFFFF' : '#999999'} size={24} />
+                <Send color={content.trim() ? '#FFFFFF' : '#999999'} size={26} />
                 <Text className={`block text-xl font-bold ${
                   content.trim() ? 'text-white' : 'text-muted-foreground'
                 }`}
@@ -214,7 +214,7 @@ export default function Publish() {
         </View>
 
         {/* 底部留白 */}
-        <View className="h-20" />
+        <View className="h-24" />
       </ScrollView>
     </View>
   )

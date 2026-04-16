@@ -91,23 +91,23 @@ export default function Index() {
         <View className="relative">
           <Image
             src="https://images.unsplash.com/photo-1504610926078-a1611febcad3?w=800&q=80"
-            className="w-full h-32 object-cover"
+            className="w-full h-36 object-cover"
             mode="aspectFill"
           />
-          <View className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-300 flex items-center px-5">
-            <View className="flex items-center gap-3">
-              <View className="w-14 h-14 bg-white bg-opacity-30 rounded-full flex items-center justify-center">
-                <Camera color="#FFFFFF" size={28} />
+          <View className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-300 flex items-center px-6">
+            <View className="flex items-center gap-4">
+              <View className="w-16 h-16 bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+                <Camera color="#FFFFFF" size={32} />
               </View>
               <View>
-                <Text className="block text-white text-xl font-bold">时光照相馆</Text>
-                <Text className="block text-white text-opacity-90 text-base mt-1">AI 老照片修复，让记忆重现</Text>
+                <Text className="block text-white text-2xl font-bold">时光照相馆</Text>
+                <Text className="block text-white text-opacity-90 text-lg mt-1">AI 老照片修复，让记忆重现</Text>
               </View>
             </View>
-            <View className="ml-auto bg-white bg-opacity-20 rounded-full px-4 py-2">
-              <View className="flex items-center gap-1">
-                <Sparkles color="#FFFFFF" size={16} />
-                <Text className="block text-white text-sm">新功能</Text>
+            <View className="ml-auto bg-white bg-opacity-20 rounded-full px-5 py-3">
+              <View className="flex items-center gap-2">
+                <Sparkles color="#FFFFFF" size={18} />
+                <Text className="block text-white text-base">新功能</Text>
               </View>
             </View>
           </View>
@@ -116,27 +116,27 @@ export default function Index() {
 
       {/* 时光照相馆提示 */}
       {showPhotoStudioTip && (
-        <View className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-black bg-opacity-80 rounded-2xl px-8 py-6 flex items-center gap-3">
-          <View className="w-6 h-6 rounded-full bg-warning bg-opacity-80 flex items-center justify-center">
-            <Text className="block text-white text-sm">!</Text>
+        <View className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-black bg-opacity-80 rounded-2xl px-10 py-8 flex items-center gap-4">
+          <View className="w-8 h-8 rounded-full bg-warning bg-opacity-80 flex items-center justify-center">
+            <Text className="block text-white text-lg">!</Text>
           </View>
-          <Text className="block text-white text-lg">功能建设中，尽情期待！</Text>
+          <Text className="block text-white text-xl">功能建设中，尽情期待！</Text>
         </View>
       )}
 
       {/* 分类筛选标签 */}
-      <View className="px-4 py-4">
+      <View className="px-4 py-5">
         <ScrollView
           scrollX
           className="whitespace-nowrap"
           scrollWithAnimation
         >
-          <View className="flex gap-3">
+          <View className="flex gap-4">
             {CATEGORIES.map((category) => (
               <View
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium transition-all ${
+                className={`inline-flex items-center justify-center px-6 py-4 rounded-full text-lg font-medium transition-all ${
                   selectedCategory === category
                     ? 'bg-primary text-white shadow-lg'
                     : 'bg-white text-foreground border-2 border-border'
@@ -159,58 +159,58 @@ export default function Index() {
         {activities.map((activity) => (
           <View
             key={activity.id}
-            className="bg-white rounded-2xl overflow-hidden card-shadow mb-4"
+            className="bg-white rounded-2xl overflow-hidden card-shadow mb-5"
             onClick={() => handleActivityClick(activity.id)}
           >
             {/* 活动图片 */}
             <View className="relative">
               <Image
                 src={activity.imageUrl}
-                className="w-full h-48 object-cover"
+                className="w-full h-52 object-cover"
                 mode="aspectFill"
               />
               {/* 分类标签 */}
-              <View className="absolute top-3 left-3 bg-white bg-opacity-90 rounded-full px-3 py-1">
-                <Text className="block text-primary text-sm font-medium">{activity.category}</Text>
+              <View className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-full px-4 py-2">
+                <Text className="block text-primary text-base font-medium">{activity.category}</Text>
               </View>
               {/* 已报名角标 */}
               {signedIds.includes(activity.id) && (
-                <View className="absolute top-3 right-3 bg-primary rounded-full px-3 py-1">
-                  <Text className="block text-white text-sm font-medium">已报名</Text>
+                <View className="absolute top-4 right-4 bg-primary rounded-full px-4 py-2">
+                  <Text className="block text-white text-base font-medium">已报名</Text>
                 </View>
               )}
             </View>
 
             {/* 活动信息 */}
-            <View className="p-4">
-              <Text className="block text-xl font-bold text-foreground mb-3 leading-tight">
+            <View className="p-5">
+              <Text className="block text-xl font-bold text-foreground mb-4 leading-tight">
                 {activity.title}
               </Text>
 
-              <View className="flex items-center gap-2 mb-2">
-                <Calendar color="#FF6B00" size={18} />
-                <Text className="block text-base text-foreground">{activity.date}</Text>
+              <View className="flex items-center gap-3 mb-3">
+                <Calendar color="#FF6B00" size={22} />
+                <Text className="block text-lg text-foreground">{activity.date}</Text>
               </View>
 
-              <View className="flex items-center gap-2 mb-2">
-                <Clock color="#666666" size={18} />
+              <View className="flex items-center gap-3 mb-3">
+                <Clock color="#666666" size={22} />
                 <Text className="block text-base text-foreground-light">{activity.time}</Text>
               </View>
 
-              <View className="flex items-center gap-2 mb-4">
-                <MapPin color="#666666" size={18} />
+              <View className="flex items-center gap-3 mb-5">
+                <MapPin color="#666666" size={22} />
                 <Text className="block text-base text-foreground-light truncate">{activity.location}</Text>
               </View>
 
               {/* 底部状态栏 */}
-              <View className="flex items-center justify-between pt-3 border-t border-border">
+              <View className="flex items-center justify-between pt-4 border-t border-border">
                 <View className="flex items-center gap-2">
-                  <Text className="block text-sm text-muted-foreground">
+                  <Text className="block text-base text-muted-foreground">
                     已报名 {activity.enrolled}/{activity.capacity} 人
                   </Text>
                 </View>
                 <View 
-                  className={`flex items-center gap-1 px-4 py-2 rounded-full text-base font-medium ${
+                  className={`flex items-center gap-2 px-5 py-3 rounded-full text-lg font-medium ${
                     activity.status === 'available'
                       ? 'bg-primary text-white'
                       : activity.status === 'full'
@@ -230,7 +230,7 @@ export default function Index() {
                   </Text>
                   {activity.status === 'available' && (
                     <ChevronRight 
-                      size={18} 
+                      size={20} 
                       color={activity.status === 'available' ? '#FFFFFF' : '#999999'} 
                     />
                   )}
