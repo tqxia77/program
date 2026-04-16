@@ -244,7 +244,7 @@ export const mockPosts: Post[] = [
     id: 'post002',
     userId: 'user002',
     userName: '张建国',
-    userAvatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=60',
+    userAvatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&q=60',
     content: '分享昨天防诈骗讲座学到的知识！昨天听了王警官的讲座，恍然大悟，原来骗子有这么多套路。现在我把几个关键点整理出来，大家一定要看：\n\n1、凡是打电话说涉嫌违法的，都是骗子！\n2、保健品治病是骗局，生病了要去医院！\n3、高收益理财都是坑，血本无归的例子太多了！\n\n大家一定要记住，有疑问就打110咨询！',
     images: [],
     publishTime: '昨天 15:30',
@@ -256,7 +256,7 @@ export const mockPosts: Post[] = [
     id: 'post003',
     userId: 'user003',
     userName: '李阿姨',
-    userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=60',
+    userAvatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=60',
     content: '今天在书法班写的第一幅字，虽然还很稚嫩，但是很有成就感！张老师说我的握笔姿势很标准，进步很快\n\n有想学书法的邻居可以联系我，我们一起报名下期的课程！',
     images: [
       'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600&q=80'
