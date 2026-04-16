@@ -27,7 +27,8 @@ export default function Profile() {
   const [showMyPosts, setShowMyPosts] = useState(false)
   
   // 字体模式
-  const { toggleFontMode, isLargeMode } = useFontMode()
+  const { toggleFontMode, isLargeMode, fontMode } = useFontMode()
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   // 加载用户数据和报名记录
   const loadUserData = useCallback(() => {
@@ -129,7 +130,7 @@ export default function Profile() {
   }
 
   return (
-    <View className="min-h-screen bg-background pb-20">
+    <View className={`min-h-screen bg-background pb-20 ${fontModeClass}`}>
       {/* 用户信息卡片 */}
       <View className="bg-gradient-to-br from-primary to-primary-dark px-4 pt-8 pb-12">
         <View className="flex items-center">

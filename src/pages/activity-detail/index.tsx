@@ -9,12 +9,15 @@ import { Calendar, MapPin, Users, ChevronLeft, Loader } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { mockActivities, getSignedActivityIds, saveSignedActivityId, type Activity } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
+import { useFontMode } from '../../store/font-mode'
 
 export default function ActivityDetail() {
   const [activity, setActivity] = useState<Activity | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [isSigned, setIsSigned] = useState(false)
+  const { fontMode } = useFontMode()
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   useEffect(() => {
     // 获取活动ID
@@ -114,7 +117,7 @@ export default function ActivityDetail() {
   }
 
   return (
-    <View className="min-h-screen bg-background">
+    <View className={`min-h-screen bg-background ${fontModeClass}`}>
       {/* 顶部导航 */}
       <View 
         className="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-95 backdrop-blur-sm border-b border-border"

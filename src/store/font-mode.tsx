@@ -9,10 +9,7 @@
  * - 大字体模式：适合视力较弱的老年人
  *   xs: 30px, sm: 32px, base: 36px, lg: 40px, xl: 44px, 2xl: 48px, 3xl: 52px
  * 
- * 使用方法：
- * 1. 在页面中导入 useFontMode hook
- * 2. 调用 toggleFontMode() 切换字体模式
- * 3. 调用 isLargeMode() 获取当前模式
+ * 修改字号请在 src/app.css 中修改对应的 CSS 变量
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
@@ -45,27 +42,32 @@ export function FontModeProvider({ children }: { children: ReactNode }) {
   // 初始化，从 LocalStorage 读取保存的模式
   useEffect(() => {
     const savedMode = Taro.getStorageSync(FONT_MODE_KEY) as FontMode
-    if (savedMode) {
+    if (savedMode === 'large' || savedMode === 'normal') {
       setFontMode(savedMode)
-      // 应用到 body/document
-      applyFontMode(savedMode)
     }
   }, [])
 
-  // 应用字体模式到根元素
+  // 应用字体模式
   const applyFontMode = (mode: FontMode) => {
-    if (typeof document !== 'undefined') {
-      document.body.classList.remove('font-mode-normal', 'font-mode-large')
-      document.body.classList.add(`font-mode-${mode}`)
-    }
+    // 保存到本地存储
+    Taro.setStorageSync(FONT_MODE_KEY, mode)
   }
 
   // 切换字体模式
   const toggleFontMode = () => {
     const newMode = fontMode === 'normal' ? 'large' : 'normal'
     setFontMode(newMode)
-    Taro.setStorageSync(FONT_MODE_KEY, newMode)
     applyFontMode(newMode)
+    
+    // 通知所有页面刷新
+    Taro.eventCenter.trigger('fontModeChange', newMode)
+    
+    // 显示切换提示
+    Taro.showToast({
+      title: `已切换为${newMode === 'large' ? '大字体' : '默认'}模式`,
+      icon: 'none',
+      duration: 1500
+    })
   }
 
   // 是否为大字体模式

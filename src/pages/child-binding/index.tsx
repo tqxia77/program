@@ -8,6 +8,7 @@ import { View, Text } from '@tarojs/components'
 import { ChevronLeft, Plus, User, Phone, Trash2 } from 'lucide-react-taro'
 import { Input } from '@/components/ui/input'
 import Taro from '@tarojs/taro'
+import { useFontMode } from '../../store/font-mode'
 
 // 子女信息类型
 interface ChildInfo {
@@ -21,6 +22,8 @@ export default function ChildBinding() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
+  const { fontMode } = useFontMode()
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   // 获取状态栏高度
   const statusBarHeight = Taro.getStorageSync('statusBarHeight') || 0
@@ -111,7 +114,7 @@ export default function ChildBinding() {
   }
 
   return (
-    <View className="min-h-screen bg-background flex flex-col">
+    <View className={`min-h-screen bg-background flex flex-col ${fontModeClass}`}>
       {/* 顶部导航栏 */}
       <View 
         className="bg-white border-b border-border px-5"

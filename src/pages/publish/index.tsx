@@ -10,11 +10,14 @@ import { Textarea } from '@/components/ui/textarea'
 import Taro from '@tarojs/taro'
 import { addLocalPost, getUserProfile } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
+import { useFontMode } from '../../store/font-mode'
 
 export default function Publish() {
   const [content, setContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isPublishing, setIsPublishing] = useState(false)
+  const { fontMode } = useFontMode()
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   // 选择图片
   const handleChooseImage = () => {
@@ -92,7 +95,7 @@ export default function Publish() {
   const statusBarHeight = Taro.getStorageSync('statusBarHeight') || 0
 
   return (
-    <View className="min-h-screen bg-background flex flex-col">
+    <View className={`min-h-screen bg-background flex flex-col ${fontModeClass}`}>
       {/* 顶部导航栏 */}
       <View 
         className="bg-white border-b border-border px-5"

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import Taro from '@tarojs/taro'
 import { getUserProfile, saveUserProfile, type UserProfile } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
+import { useFontMode } from '../../store/font-mode'
 
 export default function EditProfile() {
   const [nickname, setNickname] = useState('')
@@ -19,6 +20,8 @@ export default function EditProfile() {
   const [signature, setSignature] = useState('')
   const [avatar, setAvatar] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const { fontMode } = useFontMode()
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   useEffect(() => {
     // 加载用户资料
@@ -95,7 +98,7 @@ export default function EditProfile() {
   }
 
   return (
-    <View className="min-h-screen bg-background flex flex-col">
+    <View className={`min-h-screen bg-background flex flex-col ${fontModeClass}`}>
       {/* 顶部导航栏 */}
       <View 
         className="bg-white border-b border-border px-5"

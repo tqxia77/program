@@ -10,6 +10,7 @@ import { Heart, MessageCircle, Plus } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { getPosts, togglePostLike, getLikedPostIds, type Post } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
+import { useFontMode } from '../../store/font-mode'
 
 // 评论类型
 interface Comment {
@@ -27,6 +28,8 @@ export default function Neighborhood() {
   const [comments, setComments] = useState<Record<string, Comment[]>>({})
   const [showComments, setShowComments] = useState<string | null>(null)
   const [newComment, setNewComment] = useState('')
+  const { fontMode } = useFontMode()
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   // 加载动态数据
   const loadPosts = useCallback(() => {
@@ -117,7 +120,7 @@ export default function Neighborhood() {
   }
 
   return (
-    <View className="min-h-screen bg-background pb-20">
+    <View className={`min-h-screen bg-background pb-20 ${fontModeClass}`}>
       {/* 页面标题 */}
       <View className="bg-white border-b border-border px-5 py-5">
         <Text className="block text-3xl font-bold text-foreground">邻里圈</Text>

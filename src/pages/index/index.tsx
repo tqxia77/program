@@ -9,6 +9,7 @@ import { Calendar, MapPin, Clock } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { mockActivities, getSignedActivityIds, type Activity } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
+import { useFontMode } from '../../store/font-mode'
 
 // 分类标签
 const CATEGORIES = ['全部', '文体娱乐', '健康养生', '社区服务'] as const
@@ -18,6 +19,9 @@ export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('全部')
   const [activities, setActivities] = useState<Activity[]>([])
   const [signedIds, setSignedIds] = useState<string[]>([])
+  const { fontMode } = useFontMode()
+  
+  const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
   // 加载已报名数据
   const loadSignedData = useCallback(() => {
@@ -75,7 +79,7 @@ export default function Index() {
   }
 
   return (
-    <View className="min-h-screen bg-background pb-20">
+    <View className={`min-h-screen bg-background pb-20 ${fontModeClass}`}>
       {/* 页面标题 */}
       <View className="bg-white border-b border-border px-5 py-5">
         <Text className="block text-3xl font-bold text-foreground">活动中心</Text>
