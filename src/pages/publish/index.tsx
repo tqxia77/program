@@ -15,6 +15,13 @@ export default function Publish() {
   const [images, setImages] = useState<string[]>([])
   const [isPublishing, setIsPublishing] = useState(false)
 
+  // 图片加载失败处理（用于预览已上传的图片）
+  const handleImageError = (e: any) => {
+    if (e.target && e.target.src) {
+      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+    }
+  }
+
   // 选择图片
   const handleChooseImage = () => {
     if (images.length >= 9) {
@@ -152,6 +159,7 @@ export default function Publish() {
                   src={img}
                   className="w-28 h-28 rounded-xl object-cover"
                   mode="aspectFill"
+                  onError={handleImageError}
                 />
                 <View 
                   className="absolute -top-2 -right-2 w-8 h-8 bg-black bg-opacity-60 rounded-full flex items-center justify-center"

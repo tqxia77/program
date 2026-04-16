@@ -1,17 +1,31 @@
 /**
  * 银龄乐圈 - 邻里圈（社区互动）
- * 类似朋友圈的极简版动态展示
+ * 类似朋友圈的极简版动态展示，支持评论功能
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { Input } from '@/components/ui/input'
 import { Heart, MessageCircle, Plus } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { getPosts, togglePostLike, getLikedPostIds, type Post } from '../../store/mock-data'
 
+// 评论类型
+interface Comment {
+  id: string
+  postId: string
+  userName: string
+  userAvatar: string
+  content: string
+  time: string
+}
+
 export default function Neighborhood() {
   const [posts, setPosts] = useState<Post[]>([])
   const [likedIds, setLikedIds] = useState<string[]>([])
+  const [comments, setComments] = useState<Record<string, Comment[]>>({})
+  const [showComments, setShowComments] = useState<string | null>(null)
+  const [newComment, setNewComment] = useState('')
 
   // 加载动态数据
   const loadPosts = useCallback(() => {
@@ -19,6 +33,10 @@ export default function Neighborhood() {
     const liked = getLikedPostIds()
     setPosts(allPosts)
     setLikedIds(liked)
+    
+    // 加载评论
+    const storedComments = Taro.getStorageSync('postComments') || {}
+    setComments(storedComments)
   }, [])
 
   useEffect(() => {
@@ -46,6 +64,56 @@ export default function Neighborhood() {
         ? { ...p, likes: isLiked ? p.likes + 1 : p.likes - 1, isLiked }
         : p
     ))
+  }
+
+  // 切换评论显示
+  const toggleCommentSection = (postId: string) => {
+    setShowComments(prev => prev === postId ? null : postId)
+    setNewComment('')
+  }
+
+  // 发送评论
+  const handleSendComment = (postId: string) => {
+    if (!newComment.trim()) return
+    
+    const storedComments = Taro.getStorageSync('postComments') || {}
+    const postComments = storedComments[postId] || []
+    
+    const newCommentItem: Comment = {
+      id: `comment_${Date.now()}`,
+      postId,
+      userName: '我',
+      userAvatar: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80',
+      content: newComment.trim(),
+      time: '刚刚'
+    }
+    
+    storedComments[postId] = [...postComments, newCommentItem]
+    Taro.setStorageSync('postComments', storedComments)
+    
+    setComments({ ...storedComments })
+    setNewComment('')
+    
+    // 更新帖子评论数
+    setPosts(prev => prev.map(p => 
+      p.id === postId 
+        ? { ...p, comments: p.comments + 1 }
+        : p
+    ))
+    
+    Taro.showToast({
+      title: '评论成功',
+      icon: 'success',
+      duration: 1500
+    })
+  }
+
+  // 图片加载失败处理
+  const handleImageError = (e: any) => {
+    // 设置默认占位图
+    if (e.target && e.target.src) {
+      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+    }
   }
 
   // 跳转到发布页面
@@ -79,6 +147,7 @@ export default function Neighborhood() {
                 src={post.userAvatar}
                 className="w-16 h-16 rounded-full object-cover"
                 mode="aspectFill"
+                onError={handleImageError}
               />
               <View className="ml-4 flex-1">
                 <Text className="block text-xl font-bold text-foreground">{post.userName}</Text>
@@ -103,6 +172,7 @@ export default function Neighborhood() {
                       src={img}
                       className={`object-cover ${post.images.length === 1 ? 'w-full h-72 rounded-xl' : 'w-full h-48 rounded-xl'}`}
                       mode="aspectFill"
+                      onError={handleImageError}
                     />
                   ))}
                 </View>
@@ -133,11 +203,75 @@ export default function Neighborhood() {
                 </Text>
               </View>
 
-              <View className="flex items-center gap-3 ml-5 px-5 py-3 rounded-full bg-secondary">
+              <View 
+                className={`flex items-center gap-3 ml-4 px-5 py-3 rounded-full transition-colors ${
+                  showComments === post.id 
+                    ? 'bg-secondary' 
+                    : 'bg-secondary'
+                }`}
+                onClick={() => toggleCommentSection(post.id)}
+              >
                 <MessageCircle size={24} color="#666666" />
                 <Text className="block text-lg text-foreground">{post.comments}</Text>
               </View>
             </View>
+
+            {/* 评论区域 */}
+            {showComments === post.id && (
+              <View className="px-5 pb-4 border-t border-border pt-4">
+                {/* 评论列表 */}
+                {(comments[post.id] || []).length > 0 ? (
+                  <View className="mb-4">
+                    {comments[post.id].map((comment) => (
+                      <View key={comment.id} className="flex items-start gap-3 mb-3 pb-3 border-b border-border last:border-0">
+                        <Image
+                          src={comment.userAvatar}
+                          className="w-10 h-10 rounded-full object-cover"
+                          mode="aspectFill"
+                          onError={handleImageError}
+                        />
+                        <View className="flex-1">
+                          <View className="flex items-center gap-2">
+                            <Text className="block text-lg font-medium text-primary">{comment.userName}</Text>
+                            <Text className="block text-sm text-muted-foreground">{comment.time}</Text>
+                          </View>
+                          <Text className="block text-base text-foreground mt-1 leading-relaxed">
+                            {comment.content}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <View className="mb-4 py-4 text-center">
+                    <Text className="block text-base text-muted-foreground">暂无评论，快来抢沙发吧~</Text>
+                  </View>
+                )}
+
+                {/* 输入评论 */}
+                <View className="mt-3">
+                  <View className="bg-secondary rounded-2xl px-4 py-3 flex items-center">
+                    <View className="flex-1">
+                      <Input
+                        className="comment-input text-base text-foreground"
+                        type="text"
+                        placeholder="写下你的评论..."
+                        placeholderClass="text-muted-foreground"
+                        value={newComment}
+                        onInput={(e: any) => setNewComment(e.detail.value)}
+                        maxlength={200}
+                      />
+                    </View>
+                    <View 
+                      className="ml-3 bg-primary rounded-full px-5 py-2 active:bg-primary"
+                      onClick={() => handleSendComment(post.id)}
+                    >
+                      <Text className="block text-white text-lg font-bold">发送</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         ))}
 

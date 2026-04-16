@@ -1,25 +1,20 @@
 /**
  * 银龄乐圈 - 个人中心
- * 展示用户信息和已报名活动
+ * 展示用户信息和已报名活动，支持查看我的动态
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text, Image } from '@tarojs/components'
-import { Calendar, Settings, Users, MessageCircle, Type, Bell } from 'lucide-react-taro'
+import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { getUserProfile, getSignedActivities, type Activity } from '../../store/mock-data'
-
-interface MenuItem {
-  id: string
-  title: string
-  icon: typeof Calendar
-  action?: () => void
-}
+import { getUserProfile, getSignedActivities, getUserPosts, type Activity, type Post } from '../../store/mock-data'
 
 export default function Profile() {
   const [userName, setUserName] = useState('银龄用户')
   const [userAvatar, setUserAvatar] = useState('')
   const [signedActivities, setSignedActivities] = useState<Activity[]>([])
+  const [userPosts, setUserPosts] = useState<Post[]>([])
+  const [showMyPosts, setShowMyPosts] = useState(false)
 
   // 加载用户数据和报名记录
   const loadUserData = useCallback(() => {
@@ -29,6 +24,9 @@ export default function Profile() {
 
     const signed = getSignedActivities()
     setSignedActivities(signed)
+
+    const posts = getUserPosts()
+    setUserPosts(posts)
   }, [])
 
   useEffect(() => {
@@ -43,27 +41,17 @@ export default function Profile() {
     }
   }, [loadUserData])
 
-  // 菜单项配置
-  const menuItems: MenuItem[] = [
-    { 
-      id: 'posts', 
-      title: '我的动态', 
-      icon: MessageCircle,
-      action: () => {
-        Taro.switchTab({ url: '/pages/neighborhood/index' })
-      }
-    },
-    { 
-      id: 'binding', 
-      title: '子女绑定设置', 
-      icon: Users 
-    },
-    { 
-      id: 'settings', 
-      title: '系统设置', 
-      icon: Settings 
+  // 切换显示我的动态
+  const toggleMyPosts = () => {
+    setShowMyPosts(prev => !prev)
+  }
+
+  // 图片加载失败处理
+  const handleImageError = (e: any) => {
+    if (e.target && e.target.src) {
+      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
     }
-  ]
+  }
 
   // 大字体调节
   const handleFontSizeAdjust = () => {
@@ -84,6 +72,7 @@ export default function Profile() {
               src={userAvatar || 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'}
               className="w-28 h-28 rounded-full object-cover border-4 border-white border-opacity-30"
               mode="aspectFill"
+              onError={handleImageError}
             />
             <View className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-2 border-white" />
           </View>
@@ -122,6 +111,7 @@ export default function Profile() {
                     src={activity.imageUrl}
                     className="w-20 h-20 rounded-xl object-cover"
                     mode="aspectFill"
+                    onError={handleImageError}
                   />
                   <View className="flex-1 min-w-0">
                     <Text className="block text-lg font-medium text-foreground truncate">
@@ -147,15 +137,109 @@ export default function Profile() {
         </View>
       </View>
 
+      {/* 我的动态区域 */}
+      <View className="px-4 mt-4">
+        <View className="bg-white rounded-2xl card-shadow overflow-hidden">
+          <View 
+            className="flex items-center justify-between px-5 py-5 border-b border-border active:bg-secondary"
+            onClick={toggleMyPosts}
+          >
+            <View className="flex items-center gap-3">
+              <MessageCircle color="#FF6B00" size={26} />
+              <Text className="block text-xl font-bold text-foreground">我的动态</Text>
+              <View className="bg-primary bg-opacity-10 rounded-full px-3 py-1">
+                <Text className="block text-primary text-base font-medium">{userPosts.length}</Text>
+              </View>
+            </View>
+            <View className="flex items-center gap-2">
+              <View 
+                className={`transition-transform ${showMyPosts ? 'rotate-90' : ''}`}
+              >
+                <ChevronRight color="#999999" size={24} />
+              </View>
+            </View>
+          </View>
+
+          {/* 我的动态列表 */}
+          {showMyPosts && (
+            <View className="px-5 pb-5">
+              {userPosts.length > 0 ? (
+                userPosts.map((post) => (
+                  <View 
+                    key={post.id}
+                    className="py-4 border-b border-border last:border-0"
+                  >
+                    <View className="flex items-center gap-3 mb-2">
+                      <Image
+                        src={post.userAvatar}
+                        className="w-10 h-10 rounded-full object-cover"
+                        mode="aspectFill"
+                        onError={handleImageError}
+                      />
+                      <View className="flex-1">
+                        <Text className="block text-base font-medium text-foreground">{post.userName}</Text>
+                        <Text className="block text-sm text-muted-foreground">{post.publishTime}</Text>
+                      </View>
+                    </View>
+                    <Text className="block text-base text-foreground leading-relaxed mb-2">
+                      {post.content}
+                    </Text>
+                    {post.images.length > 0 && (
+                      <View className="flex gap-2 flex-wrap">
+                        {post.images.map((img, index) => (
+                          <Image
+                            key={index}
+                            src={img}
+                            className="w-20 h-20 rounded-lg object-cover"
+                            mode="aspectFill"
+                            onError={handleImageError}
+                          />
+                        ))}
+                      </View>
+                    )}
+                    <View className="flex items-center gap-4 mt-3">
+                      <View className="flex items-center gap-2">
+                        <Heart color="#FF6B00" size={18} />
+                        <Text className="block text-sm text-muted-foreground">{post.likes}</Text>
+                      </View>
+                      <View className="flex items-center gap-2">
+                        <MessageCircle color="#FF6B00" size={18} />
+                        <Text className="block text-sm text-muted-foreground">{post.comments}</Text>
+                      </View>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <View className="py-8 flex flex-col items-center">
+                  <MessageCircle color="#CCCCCC" size={48} />
+                  <Text className="block text-base text-muted-foreground mt-3">还没有发布过动态</Text>
+                  <Text className="block text-sm text-muted-foreground mt-1">快去邻里圈发布第一条动态吧</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      </View>
+
       {/* 菜单列表 */}
       <View className="px-4 mt-4">
         <View className="bg-white rounded-2xl card-shadow overflow-hidden">
-          {menuItems.map((item, index) => (
+          {[
+            { 
+              id: 'binding', 
+              title: '子女绑定设置', 
+              icon: Users 
+            },
+            { 
+              id: 'settings', 
+              title: '系统设置', 
+              icon: Settings 
+            }
+          ].map((item, index) => (
             <View key={item.id}>
               {index > 0 && <View className="h-px bg-border mx-5" />}
               <View 
                 className="flex items-center justify-between px-5 py-5 active:bg-secondary"
-                onClick={item.action}
               >
                 <View className="flex items-center gap-4">
                   <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
@@ -164,7 +248,7 @@ export default function Profile() {
                   <Text className="block text-xl text-foreground">{item.title}</Text>
                 </View>
                 <View className="w-8 h-8 flex items-center justify-center">
-                  <Text className="text-muted-foreground text-2xl">›</Text>
+                  <ChevronRight color="#999999" size={24} />
                 </View>
               </View>
             </View>
@@ -189,7 +273,7 @@ export default function Profile() {
               </View>
             </View>
             <View className="w-8 h-8 flex items-center justify-center">
-              <Text className="text-muted-foreground text-2xl">›</Text>
+              <ChevronRight color="#999999" size={24} />
             </View>
           </View>
 

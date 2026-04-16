@@ -15,6 +15,13 @@ export default function ActivityDetail() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [isSigned, setIsSigned] = useState(false)
 
+  // 图片加载失败处理
+  const handleImageError = (e: any) => {
+    if (e.target && e.target.src) {
+      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+    }
+  }
+
   useEffect(() => {
     // 获取活动ID
     const currentPage = Taro.getCurrentPages().pop() as any
@@ -141,6 +148,7 @@ export default function ActivityDetail() {
             src={activity.imageUrl}
             className="w-full h-64 object-cover"
             mode="aspectFill"
+            onError={handleImageError}
           />
           <View className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black bg-opacity-60 to-transparent p-4">
             <Text className="block text-white text-2xl font-bold">{activity.title}</Text>

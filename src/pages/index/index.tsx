@@ -31,6 +31,13 @@ export default function Index() {
   const [signedIds, setSignedIds] = useState<string[]>([])
   const [showPhotoStudioTip, setShowPhotoStudioTip] = useState(false)
 
+  // 图片加载失败处理
+  const handleImageError = (e: any) => {
+    if (e.target && e.target.src) {
+      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+    }
+  }
+
   // 加载已报名数据
   const loadSignedData = useCallback(() => {
     const ids = getSignedActivityIds()
@@ -93,6 +100,7 @@ export default function Index() {
             src="https://images.unsplash.com/photo-1504610926078-a1611febcad3?w=800&q=80"
             className="w-full h-36 object-cover"
             mode="aspectFill"
+            onError={handleImageError}
           />
           <View className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-300 flex items-center px-6">
             <View className="flex items-center gap-4">
@@ -168,6 +176,7 @@ export default function Index() {
                 src={activity.imageUrl}
                 className="w-full h-52 object-cover"
                 mode="aspectFill"
+                onError={handleImageError}
               />
               {/* 分类标签 */}
               <View className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-full px-4 py-2">

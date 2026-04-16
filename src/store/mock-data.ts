@@ -425,6 +425,19 @@ export const togglePostLike = (postId: string): boolean => {
   }
 }
 
+/**
+ * 获取当前用户自己发布的动态
+ */
+export const getUserPosts = (): Post[] => {
+  try {
+    const localData = Taro.getStorageSync(STORAGE_KEYS.POSTS)
+    const localPosts: Post[] = localData ? JSON.parse(localData) : []
+    return localPosts
+  } catch {
+    return []
+  }
+}
+
 // ============================================
 // 导出类型
 // ============================================
