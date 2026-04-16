@@ -5,7 +5,9 @@ const config: any = {
     'pages/neighborhood/index',
     'pages/profile/index',
     'pages/activity-detail/index',
-    'pages/publish/index'
+    'pages/publish/index',
+    'pages/edit-profile/index',
+    'pages/child-binding/index'
   ],
   window: {
     backgroundTextStyle: 'light',

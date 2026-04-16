@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { Camera, Sparkles, Calendar, MapPin, Clock, ChevronRight } from 'lucide-react-taro'
+import { Camera, Calendar, MapPin, Clock, ChevronRight } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { mockActivities, getSignedActivityIds, type Activity } from '../../store/mock-data'
 
@@ -104,7 +104,8 @@ export default function Index() {
           />
           <View className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-300 flex items-center px-6">
             <View className="flex items-center gap-4">
-              <View className="w-16 h-16 bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+              {/* 方形图标 */}
+              <View className="w-16 h-16 bg-white bg-opacity-30 rounded-xl flex items-center justify-center">
                 <Camera color="#FFFFFF" size={32} />
               </View>
               <View>
@@ -112,11 +113,15 @@ export default function Index() {
                 <Text className="block text-white text-opacity-90 text-lg mt-1">AI 老照片修复，让记忆重现</Text>
               </View>
             </View>
-            <View className="ml-auto bg-white bg-opacity-20 rounded-full px-5 py-3">
-              <View className="flex items-center gap-2">
-                <Sparkles color="#FFFFFF" size={18} />
-                <Text className="block text-white text-base">新功能</Text>
-              </View>
+            {/* 去试试按钮 */}
+            <View 
+              className="ml-auto bg-white rounded-full px-6 py-3 active:bg-opacity-80"
+              onClick={(e) => {
+                e.stopPropagation()
+                handlePhotoStudioClick()
+              }}
+            >
+              <Text className="block text-primary text-3xl font-bold">去试试</Text>
             </View>
           </View>
         </View>

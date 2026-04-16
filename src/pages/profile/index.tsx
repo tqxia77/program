@@ -1,13 +1,21 @@
 /**
  * 银龄乐圈 - 个人中心
- * 展示用户信息和已报名活动，支持查看我的动态
+ * 展示用户信息，支持报名管理、动态管理、资料编辑
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text, Image } from '@tarojs/components'
-import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart } from 'lucide-react-taro'
+import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { getUserProfile, getSignedActivities, getUserPosts, type Activity, type Post } from '../../store/mock-data'
+import { 
+  getUserProfile, 
+  getSignedActivities, 
+  getUserPosts, 
+  removeSignedActivityId,
+  deleteUserPost,
+  type Activity, 
+  type Post 
+} from '../../store/mock-data'
 
 export default function Profile() {
   const [userName, setUserName] = useState('银龄用户')
@@ -44,6 +52,64 @@ export default function Profile() {
   // 切换显示我的动态
   const toggleMyPosts = () => {
     setShowMyPosts(prev => !prev)
+  }
+
+  // 取消报名
+  const handleCancelSignUp = (activityId: string, e: any) => {
+    e.stopPropagation()
+    Taro.showModal({
+      title: '取消报名',
+      content: '确定要取消报名吗？',
+      confirmText: '确定取消',
+      cancelText: '保留报名',
+      success: (res) => {
+        if (res.confirm) {
+          removeSignedActivityId(activityId)
+          loadUserData()
+          Taro.showToast({
+            title: '已取消报名',
+            icon: 'success',
+            duration: 1500
+          })
+        }
+      }
+    })
+  }
+
+  // 删除动态
+  const handleDeletePost = (postId: string, e: any) => {
+    e.stopPropagation()
+    Taro.showModal({
+      title: '删除动态',
+      content: '确定要删除这条动态吗？',
+      confirmText: '删除',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          deleteUserPost(postId)
+          loadUserData()
+          Taro.showToast({
+            title: '已删除',
+            icon: 'success',
+            duration: 1500
+          })
+        }
+      }
+    })
+  }
+
+  // 跳转到编辑资料页面
+  const handleEditProfile = () => {
+    Taro.navigateTo({
+      url: '/pages/edit-profile/index'
+    })
+  }
+
+  // 跳转到子女绑定页面
+  const handleChildBinding = () => {
+    Taro.navigateTo({
+      url: '/pages/child-binding/index'
+    })
   }
 
   // 图片加载失败处理
@@ -84,6 +150,13 @@ export default function Profile() {
               </View>
             </View>
           </View>
+          {/* 编辑资料按钮 */}
+          <View 
+            className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+            onClick={handleEditProfile}
+          >
+            <Pencil color="#FFFFFF" size={24} />
+          </View>
         </View>
       </View>
 
@@ -121,8 +194,11 @@ export default function Profile() {
                       {activity.date}
                     </Text>
                   </View>
-                  <View className="bg-success bg-opacity-10 rounded-full px-4 py-2">
-                    <Text className="block text-success text-base font-medium">已报名</Text>
+                  <View 
+                    className="bg-error bg-opacity-10 rounded-full px-4 py-2 active:bg-opacity-20"
+                    onClick={(e) => handleCancelSignUp(activity.id, e)}
+                  >
+                    <Text className="block text-error text-base font-medium">取消报名</Text>
                   </View>
                 </View>
               ))}
@@ -151,12 +227,10 @@ export default function Profile() {
                 <Text className="block text-primary text-base font-medium">{userPosts.length}</Text>
               </View>
             </View>
-            <View className="flex items-center gap-2">
-              <View 
-                className={`transition-transform ${showMyPosts ? 'rotate-90' : ''}`}
-              >
-                <ChevronRight color="#999999" size={24} />
-              </View>
+            <View 
+              className={`transition-transform ${showMyPosts ? 'rotate-90' : ''}`}
+            >
+              <ChevronRight color="#999999" size={24} />
             </View>
           </View>
 
@@ -169,42 +243,53 @@ export default function Profile() {
                     key={post.id}
                     className="py-4 border-b border-border last:border-0"
                   >
-                    <View className="flex items-center gap-3 mb-2">
-                      <Image
-                        src={post.userAvatar}
-                        className="w-10 h-10 rounded-full object-cover"
-                        mode="aspectFill"
-                        onError={handleImageError}
-                      />
+                    <View className="flex items-start gap-3 mb-2">
                       <View className="flex-1">
-                        <Text className="block text-base font-medium text-foreground">{post.userName}</Text>
-                        <Text className="block text-sm text-muted-foreground">{post.publishTime}</Text>
-                      </View>
-                    </View>
-                    <Text className="block text-base text-foreground leading-relaxed mb-2">
-                      {post.content}
-                    </Text>
-                    {post.images.length > 0 && (
-                      <View className="flex gap-2 flex-wrap">
-                        {post.images.map((img, index) => (
+                        <View className="flex items-center gap-3 mb-2">
                           <Image
-                            key={index}
-                            src={img}
-                            className="w-20 h-20 rounded-lg object-cover"
+                            src={post.userAvatar}
+                            className="w-10 h-10 rounded-full object-cover"
                             mode="aspectFill"
                             onError={handleImageError}
                           />
-                        ))}
+                          <View className="flex-1">
+                            <Text className="block text-base font-medium text-foreground">{post.userName}</Text>
+                            <Text className="block text-sm text-muted-foreground">{post.publishTime}</Text>
+                          </View>
+                        </View>
+                        <Text className="block text-base text-foreground leading-relaxed mb-2">
+                          {post.content}
+                        </Text>
+                        {post.images.length > 0 && (
+                          <View className="flex gap-2 flex-wrap mb-2">
+                            {post.images.map((img, index) => (
+                              <Image
+                                key={index}
+                                src={img}
+                                className="w-20 h-20 rounded-lg object-cover"
+                                mode="aspectFill"
+                                onError={handleImageError}
+                              />
+                            ))}
+                          </View>
+                        )}
+                        <View className="flex items-center gap-4">
+                          <View className="flex items-center gap-2">
+                            <Heart color="#FF6B00" size={18} />
+                            <Text className="block text-sm text-muted-foreground">{post.likes}</Text>
+                          </View>
+                          <View className="flex items-center gap-2">
+                            <MessageCircle color="#FF6B00" size={18} />
+                            <Text className="block text-sm text-muted-foreground">{post.comments}</Text>
+                          </View>
+                        </View>
                       </View>
-                    )}
-                    <View className="flex items-center gap-4 mt-3">
-                      <View className="flex items-center gap-2">
-                        <Heart color="#FF6B00" size={18} />
-                        <Text className="block text-sm text-muted-foreground">{post.likes}</Text>
-                      </View>
-                      <View className="flex items-center gap-2">
-                        <MessageCircle color="#FF6B00" size={18} />
-                        <Text className="block text-sm text-muted-foreground">{post.comments}</Text>
+                      {/* 删除按钮 */}
+                      <View 
+                        className="w-10 h-10 bg-error bg-opacity-10 rounded-full flex items-center justify-center"
+                        onClick={(e) => handleDeletePost(post.id, e)}
+                      >
+                        <X color="#E53935" size={20} />
                       </View>
                     </View>
                   </View>
@@ -226,9 +311,16 @@ export default function Profile() {
         <View className="bg-white rounded-2xl card-shadow overflow-hidden">
           {[
             { 
+              id: 'edit-profile', 
+              title: '编辑资料', 
+              icon: Pencil,
+              action: handleEditProfile
+            },
+            { 
               id: 'binding', 
               title: '子女绑定设置', 
-              icon: Users 
+              icon: Users,
+              action: handleChildBinding
             },
             { 
               id: 'settings', 
@@ -240,6 +332,7 @@ export default function Profile() {
               {index > 0 && <View className="h-px bg-border mx-5" />}
               <View 
                 className="flex items-center justify-between px-5 py-5 active:bg-secondary"
+                onClick={item.action}
               >
                 <View className="flex items-center gap-4">
                   <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
@@ -247,9 +340,7 @@ export default function Profile() {
                   </View>
                   <Text className="block text-xl text-foreground">{item.title}</Text>
                 </View>
-                <View className="w-8 h-8 flex items-center justify-center">
-                  <ChevronRight color="#999999" size={24} />
-                </View>
+                <ChevronRight color="#999999" size={24} />
               </View>
             </View>
           ))}
@@ -272,9 +363,7 @@ export default function Profile() {
                 <Text className="block text-base text-muted-foreground mt-1">点击体验适老化大字效果</Text>
               </View>
             </View>
-            <View className="w-8 h-8 flex items-center justify-center">
-              <ChevronRight color="#999999" size={24} />
-            </View>
+            <ChevronRight color="#999999" size={24} />
           </View>
 
           <View className="h-px bg-border mx-5" />

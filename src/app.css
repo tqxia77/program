@@ -66,14 +66,14 @@ root-portal {
   --radius-xl: 24px;
   --radius-full: 9999px;
   
-  /* 适老化字号 - 再次放大20px便于老年人阅读 */
-  --text-xs: 18px;
-  --text-sm: 20px;
-  --text-base: 22px;
-  --text-lg: 24px;
-  --text-xl: 28px;
-  --text-2xl: 34px;
-  --text-3xl: 40px;
+  /* 适老化字号 - 再次放大便于老年人阅读 */
+  --text-xs: 40px;
+  --text-sm: 42px;
+  --text-base: 44px;
+  --text-lg: 50px;
+  --text-xl: 54px;
+  --text-2xl: 60px;
+  --text-3xl: 66px;
   
   /* 侧边栏 */
   --sidebar: #FFFBF7;

@@ -321,6 +321,19 @@ export const saveSignedActivityId = (activityId: string): void => {
 }
 
 /**
+ * 取消已报名的活动ID
+ */
+export const removeSignedActivityId = (activityId: string): void => {
+  try {
+    const ids = getSignedActivityIds()
+    const newIds = ids.filter(id => id !== activityId)
+    Taro.setStorageSync(STORAGE_KEYS.SIGNED_ACTIVITIES, JSON.stringify(newIds))
+  } catch (e) {
+    console.error('取消报名失败:', e)
+  }
+}
+
+/**
  * 批量获取已报名的活动详情
  */
 export const getSignedActivities = (): Activity[] => {
@@ -435,6 +448,20 @@ export const getUserPosts = (): Post[] => {
     return localPosts
   } catch {
     return []
+  }
+}
+
+/**
+ * 删除用户发布的动态
+ */
+export const deleteUserPost = (postId: string): void => {
+  try {
+    const localData = Taro.getStorageSync(STORAGE_KEYS.POSTS)
+    const localPosts: Post[] = localData ? JSON.parse(localData) : []
+    const newPosts = localPosts.filter(post => post.id !== postId)
+    Taro.setStorageSync(STORAGE_KEYS.POSTS, JSON.stringify(newPosts))
+  } catch (e) {
+    console.error('删除动态失败:', e)
   }
 }
 
