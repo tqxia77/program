@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { Camera, Calendar, MapPin, Clock, ChevronRight } from 'lucide-react-taro'
+import { Calendar, MapPin, Clock, ChevronRight } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { mockActivities, getSignedActivityIds, type Activity } from '../../store/mock-data'
 
@@ -31,10 +31,15 @@ export default function Index() {
   const [signedIds, setSignedIds] = useState<string[]>([])
   const [showPhotoStudioTip, setShowPhotoStudioTip] = useState(false)
 
-  // 图片加载失败处理
+  // 图片加载失败处理（兼容H5和小程序）
   const handleImageError = (e: any) => {
-    if (e.target && e.target.src) {
-      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+    try {
+      const target = e?.target || e?.srcElement
+      if (target && target.src) {
+        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+      }
+    } catch (err) {
+      // 静默处理错误
     }
   }
 
@@ -106,7 +111,10 @@ export default function Index() {
             <View className="flex items-center gap-4">
               {/* 方形图标 */}
               <View className="w-16 h-16 bg-white bg-opacity-30 rounded-xl flex items-center justify-center">
-                <Camera color="#FFFFFF" size={32} />
+                <Image 
+                  src="https://images.unsplash.com/photo-1562583277-333d8dca6415?w=400&q=60" 
+                  className="w-16 h-16 rounded-xl object-cover" 
+                />
               </View>
               <View>
                 <Text className="block text-white text-2xl font-bold">时光照相馆</Text>

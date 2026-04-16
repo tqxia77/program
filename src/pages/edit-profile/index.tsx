@@ -93,10 +93,15 @@ export default function EditProfile() {
     }, 1500)
   }
 
-  // 图片加载失败处理
+  // 图片加载失败处理（兼容H5和小程序）
   const handleImageError = (e: any) => {
-    if (e.target && e.target.src) {
-      e.target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'
+    try {
+      const target = e?.target || e?.srcElement
+      if (target && target.src) {
+        target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'
+      }
+    } catch (err) {
+      // 静默处理错误
     }
   }
 

@@ -15,10 +15,15 @@ export default function Publish() {
   const [images, setImages] = useState<string[]>([])
   const [isPublishing, setIsPublishing] = useState(false)
 
-  // 图片加载失败处理（用于预览已上传的图片）
+  // 图片加载失败处理（兼容H5和小程序）
   const handleImageError = (e: any) => {
-    if (e.target && e.target.src) {
-      e.target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+    try {
+      const target = e?.target || e?.srcElement
+      if (target && target.src) {
+        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
+      }
+    } catch (err) {
+      // 静默处理错误
     }
   }
 
