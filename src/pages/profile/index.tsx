@@ -16,6 +16,7 @@ import {
   type Activity, 
   type Post 
 } from '../../store/mock-data'
+import { useFontMode } from '../../store/font-mode'
 
 export default function Profile() {
   const [userName, setUserName] = useState('银龄用户')
@@ -23,6 +24,9 @@ export default function Profile() {
   const [signedActivities, setSignedActivities] = useState<Activity[]>([])
   const [userPosts, setUserPosts] = useState<Post[]>([])
   const [showMyPosts, setShowMyPosts] = useState(false)
+  
+  // 字体模式
+  const { toggleFontMode, isLargeMode } = useFontMode()
 
   // 加载用户数据和报名记录
   const loadUserData = useCallback(() => {
@@ -121,10 +125,12 @@ export default function Profile() {
 
   // 大字体调节
   const handleFontSizeAdjust = () => {
+    toggleFontMode()
+    const mode = isLargeMode() ? '默认' : '大字体'
     Taro.showToast({
-      title: '大字体模式演示成功',
+      title: `已切换为${mode}模式`,
       icon: 'none',
-      duration: 2000
+      duration: 1500
     })
   }
 
@@ -355,15 +361,24 @@ export default function Profile() {
             onClick={handleFontSizeAdjust}
           >
             <View className="flex items-center gap-4">
-              <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
-                <Type color="#FF6B00" size={24} />
+              <View className={`w-14 h-14 rounded-full flex items-center justify-center ${isLargeMode() ? 'bg-primary' : 'bg-secondary'}`}>
+                <Type color={isLargeMode() ? '#FFFFFF' : '#FF6B00'} size={26} />
               </View>
               <View>
-                <Text className="block text-xl text-foreground">大字体模式</Text>
-                <Text className="block text-base text-muted-foreground mt-1">点击体验适老化大字效果</Text>
+                <Text className="block text-xl text-foreground">字体大小</Text>
+                <Text className="block text-base text-muted-foreground mt-1">
+                  {isLargeMode() ? '当前：大字体模式' : '当前：默认模式'}
+                </Text>
               </View>
             </View>
-            <ChevronRight color="#999999" size={24} />
+            <View className="flex items-center">
+              <View className={`px-4 py-2 rounded-full mr-2 ${isLargeMode() ? 'bg-primary' : 'bg-secondary'}`}>
+                <Text className={`block text-lg font-medium ${isLargeMode() ? 'text-white' : 'text-foreground'}`}>
+                  {isLargeMode() ? '大' : '标准'}
+                </Text>
+              </View>
+              <ChevronRight color="#999999" size={24} />
+            </View>
           </View>
 
           <View className="h-px bg-border mx-5" />

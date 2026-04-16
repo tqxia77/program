@@ -8,6 +8,42 @@
    专为回迁社区老年人设计的温暖界面
    ============================================ */
 
+/* ========== 字号模式定义 ========== */
+/* 
+ * 字号配置说明：
+ * - 默认模式：适合一般视力老年人
+ * - 大字体模式：适合视力较弱的老年人
+ * 
+ * 修改字号请在对应模式下的 --text-* 变量中修改
+ */
+
+/* 默认模式字号 */
+:root,
+page,
+root-portal,
+.font-mode-normal {
+  /* 适老化字号 - 默认模式 */
+  --text-xs: 18px;
+  --text-sm: 20px;
+  --text-base: 24px;
+  --text-lg: 28px;
+  --text-xl: 32px;
+  --text-2xl: 36px;
+  --text-3xl: 40px;
+}
+
+/* 大字体模式字号 */
+.font-mode-large {
+  /* 适老化字号 - 大字体模式 */
+  --text-xs: 30px;
+  --text-sm: 32px;
+  --text-base: 36px;
+  --text-lg: 40px;
+  --text-xl: 44px;
+  --text-2xl: 48px;
+  --text-3xl: 52px;
+}
+
 /* 暖橙色主色调 - 温暖亲切 */
 :root,
 page,
@@ -65,15 +101,6 @@ root-portal {
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
-  
-  /* 适老化字号 - 再次放大便于老年人阅读 */
-  --text-xs: 40px;
-  --text-sm: 42px;
-  --text-base: 44px;
-  --text-lg: 50px;
-  --text-xl: 54px;
-  --text-2xl: 60px;
-  --text-3xl: 66px;
   
   /* 侧边栏 */
   --sidebar: #FFFBF7;

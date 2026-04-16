@@ -121,7 +121,7 @@ export default function Index() {
                 handlePhotoStudioClick()
               }}
             >
-              <Text className="block text-primary text-3xl font-bold">去试试</Text>
+              <Text className="block text-primary text-2xl font-bold">去试试</Text>
             </View>
           </View>
         </View>
