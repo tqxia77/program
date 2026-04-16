@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
-import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X } from 'lucide-react-taro'
+import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X, CalendarPlus } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { 
   getUserProfile, 
@@ -115,6 +115,13 @@ export default function Profile() {
   const handleChildBinding = () => {
     Taro.navigateTo({
       url: '/pages/child-binding/index'
+    })
+  }
+
+  // 跳转到管理员活动管理页面
+  const handleAdminActivities = () => {
+    Taro.navigateTo({
+      url: '/pages/admin/activities/index'
     })
   }
 
@@ -312,6 +319,12 @@ export default function Profile() {
               title: '编辑资料', 
               icon: Pencil,
               action: handleEditProfile
+            },
+            { 
+              id: 'admin-activities', 
+              title: '活动管理', 
+              icon: CalendarPlus,
+              action: handleAdminActivities
             },
             { 
               id: 'binding', 

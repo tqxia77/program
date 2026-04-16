@@ -176,21 +176,17 @@ export default function Neighborhood() {
             {/* 底部互动栏 */}
             <View className="flex items-center px-5 py-4 border-t border-border">
               <View 
-                className={`flex items-center gap-3 px-5 py-3 rounded-full transition-colors ${
-                  likedIds.includes(post.id) 
-                    ? 'bg-primary' 
-                    : 'bg-secondary'
-                }`}
+                className="flex items-center gap-3 px-5 py-3 rounded-full transition-colors bg-secondary"
                 onClick={() => handleLike(post.id)}
               >
                 <Heart 
                   size={24} 
-                  color={likedIds.includes(post.id) ? '#FF6B00' : '#666666'}
+                  color={likedIds.includes(post.id) ? '#EF4444' : '#999999'}
                   filled={likedIds.includes(post.id)}
                 />
                 <Text className={`block text-lg ${
                   likedIds.includes(post.id) 
-                    ? 'text-white font-medium' 
+                    ? 'text-red-500 font-medium' 
                     : 'text-foreground'
                 }`}
                 >
