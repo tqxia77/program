@@ -4,11 +4,12 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import { Input } from '@/components/ui/input'
 import { Heart, MessageCircle, Plus } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { getPosts, togglePostLike, getLikedPostIds, type Post } from '../../store/mock-data'
+import { SafeImage } from '../../components/safe-image'
 
 // 评论类型
 interface Comment {
@@ -83,7 +84,7 @@ export default function Neighborhood() {
       id: `comment_${Date.now()}`,
       postId,
       userName: '我',
-      userAvatar: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80',
+      userAvatar: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=60',
       content: newComment.trim(),
       time: '刚刚'
     }
@@ -106,18 +107,6 @@ export default function Neighborhood() {
       icon: 'success',
       duration: 1500
     })
-  }
-
-  // 图片加载失败处理（兼容H5和小程序）
-  const handleImageError = (e: any) => {
-    try {
-      const target = e?.target || e?.srcElement
-      if (target && target.src) {
-        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
-      }
-    } catch (err) {
-      // 静默处理错误
-    }
   }
 
   // 跳转到发布页面
@@ -147,11 +136,10 @@ export default function Neighborhood() {
           >
             {/* 用户信息 */}
             <View className="flex items-center p-5">
-              <Image
+              <SafeImage
                 src={post.userAvatar}
-                className="w-16 h-16 rounded-full object-cover"
+                className="w-16 h-16 rounded-full"
                 mode="aspectFill"
-                onError={handleImageError}
               />
               <View className="ml-4 flex-1">
                 <Text className="block text-xl font-bold text-foreground">{post.userName}</Text>
@@ -171,12 +159,11 @@ export default function Neighborhood() {
               <View className="px-5 pb-4">
                 <View className={post.images.length === 1 ? 'flex' : 'grid grid-cols-2 gap-2'}>
                   {post.images.map((img, index) => (
-                    <Image
+                    <SafeImage
                       key={index}
                       src={img}
                       className={`object-cover ${post.images.length === 1 ? 'w-full h-72 rounded-xl' : 'w-full h-48 rounded-xl'}`}
                       mode="aspectFill"
-                      onError={handleImageError}
                     />
                   ))}
                 </View>
@@ -208,11 +195,7 @@ export default function Neighborhood() {
               </View>
 
               <View 
-                className={`flex items-center gap-3 ml-4 px-5 py-3 rounded-full transition-colors ${
-                  showComments === post.id 
-                    ? 'bg-secondary' 
-                    : 'bg-secondary'
-                }`}
+                className="flex items-center gap-3 ml-4 px-5 py-3 rounded-full transition-colors bg-secondary"
                 onClick={() => toggleCommentSection(post.id)}
               >
                 <MessageCircle size={24} color="#666666" />
@@ -228,11 +211,10 @@ export default function Neighborhood() {
                   <View className="mb-4">
                     {comments[post.id].map((comment) => (
                       <View key={comment.id} className="flex items-start gap-3 mb-3 pb-3 border-b border-border last:border-0">
-                        <Image
+                        <SafeImage
                           src={comment.userAvatar}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full"
                           mode="aspectFill"
-                          onError={handleImageError}
                         />
                         <View className="flex-1">
                           <View className="flex items-center gap-2">
@@ -252,7 +234,7 @@ export default function Neighborhood() {
                   </View>
                 )}
 
-                {/* 输入评论 */}
+                {/* 评论输入框 */}
                 <View className="mt-3">
                   <View className="bg-secondary rounded-2xl px-4 py-3 flex items-center">
                     <View className="flex-1">

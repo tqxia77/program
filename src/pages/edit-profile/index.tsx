@@ -4,12 +4,13 @@
  */
 
 import { useState, useEffect } from 'react'
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import { ChevronLeft, Camera } from 'lucide-react-taro'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import Taro from '@tarojs/taro'
 import { getUserProfile, saveUserProfile, type UserProfile } from '../../store/mock-data'
+import { SafeImage } from '../../components/safe-image'
 
 export default function EditProfile() {
   const [nickname, setNickname] = useState('')
@@ -93,18 +94,6 @@ export default function EditProfile() {
     }, 1500)
   }
 
-  // 图片加载失败处理（兼容H5和小程序）
-  const handleImageError = (e: any) => {
-    try {
-      const target = e?.target || e?.srcElement
-      if (target && target.src) {
-        target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'
-      }
-    } catch (err) {
-      // 静默处理错误
-    }
-  }
-
   return (
     <View className="min-h-screen bg-background flex flex-col">
       {/* 顶部导航栏 */}
@@ -141,11 +130,10 @@ export default function EditProfile() {
             className="relative"
             onClick={handleChooseAvatar}
           >
-            <Image
-              src={avatar || 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'}
-              className="w-32 h-32 rounded-full object-cover border-4 border-primary border-opacity-20"
+            <SafeImage
+              src={avatar || 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=60'}
+              className="w-32 h-32 rounded-full"
               mode="aspectFill"
-              onError={handleImageError}
             />
             <View className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center border-2 border-white">
               <Camera color="#FFFFFF" size={20} />

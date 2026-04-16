@@ -4,28 +4,17 @@
  */
 
 import { useState } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import { ChevronLeft, ImagePlus, Send, X } from 'lucide-react-taro'
 import { Textarea } from '@/components/ui/textarea'
 import Taro from '@tarojs/taro'
 import { addLocalPost, getUserProfile } from '../../store/mock-data'
+import { SafeImage } from '../../components/safe-image'
 
 export default function Publish() {
   const [content, setContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isPublishing, setIsPublishing] = useState(false)
-
-  // 图片加载失败处理（兼容H5和小程序）
-  const handleImageError = (e: any) => {
-    try {
-      const target = e?.target || e?.srcElement
-      if (target && target.src) {
-        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
-      }
-    } catch (err) {
-      // 静默处理错误
-    }
-  }
 
   // 选择图片
   const handleChooseImage = () => {
@@ -160,11 +149,10 @@ export default function Publish() {
             {/* 已选择的图片 */}
             {images.map((img, index) => (
               <View key={index} className="relative">
-                <Image
+                <SafeImage
                   src={img}
-                  className="w-28 h-28 rounded-xl object-cover"
+                  className="w-28 h-28 rounded-xl"
                   mode="aspectFill"
-                  onError={handleImageError}
                 />
                 <View 
                   className="absolute -top-2 -right-2 w-8 h-8 bg-black bg-opacity-60 rounded-full flex items-center justify-center"
@@ -227,7 +215,7 @@ export default function Publish() {
         </View>
 
         {/* 底部留白 */}
-        <View className="h-24" />
+        <View className="h-20" />
       </ScrollView>
     </View>
   )

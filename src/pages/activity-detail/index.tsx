@@ -4,28 +4,17 @@
  */
 
 import { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import { Calendar, MapPin, Users, ChevronLeft, Loader } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { mockActivities, getSignedActivityIds, saveSignedActivityId, type Activity } from '../../store/mock-data'
+import { SafeImage } from '../../components/safe-image'
 
 export default function ActivityDetail() {
   const [activity, setActivity] = useState<Activity | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [isSigned, setIsSigned] = useState(false)
-
-  // 图片加载失败处理（兼容H5和小程序）
-  const handleImageError = (e: any) => {
-    try {
-      const target = e?.target || e?.srcElement
-      if (target && target.src) {
-        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
-      }
-    } catch (err) {
-      // 静默处理错误
-    }
-  }
 
   useEffect(() => {
     // 获取活动ID
@@ -149,11 +138,10 @@ export default function ActivityDetail() {
       >
         {/* 活动图片 */}
         <View className="relative">
-          <Image
+          <SafeImage
             src={activity.imageUrl}
-            className="w-full h-64 object-cover"
+            className="w-full h-64"
             mode="aspectFill"
-            onError={handleImageError}
           />
           <View className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black bg-opacity-60 to-transparent p-4">
             <Text className="block text-white text-2xl font-bold">{activity.title}</Text>

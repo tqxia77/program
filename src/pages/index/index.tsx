@@ -4,44 +4,20 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { Calendar, MapPin, Clock, ChevronRight } from 'lucide-react-taro'
+import { View, Text, ScrollView } from '@tarojs/components'
+import { Calendar, MapPin, Clock } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { mockActivities, getSignedActivityIds, type Activity } from '../../store/mock-data'
+import { SafeImage } from '../../components/safe-image'
 
 // 分类标签
 const CATEGORIES = ['全部', '文体娱乐', '健康养生', '社区服务'] as const
 type Category = typeof CATEGORIES[number]
 
-// 状态标签显示文本
-const getStatusText = (status: Activity['status']): string => {
-  switch (status) {
-    case 'available':
-      return '立即报名'
-    case 'full':
-      return '名额已满'
-    case 'signed':
-      return '已报名'
-  }
-}
-
 export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('全部')
   const [activities, setActivities] = useState<Activity[]>([])
   const [signedIds, setSignedIds] = useState<string[]>([])
-  const [showPhotoStudioTip, setShowPhotoStudioTip] = useState(false)
-
-  // 图片加载失败处理（兼容H5和小程序）
-  const handleImageError = (e: any) => {
-    try {
-      const target = e?.target || e?.srcElement
-      if (target && target.src) {
-        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
-      }
-    } catch (err) {
-      // 静默处理错误
-    }
-  }
 
   // 加载已报名数据
   const loadSignedData = useCallback(() => {
@@ -49,79 +25,86 @@ export default function Index() {
     setSignedIds(ids)
   }, [])
 
-  // 过滤活动列表
-  const filterActivities = useCallback(() => {
-    let filtered = [...mockActivities]
+  // 加载活动数据
+  const loadActivities = useCallback(() => {
+    let filteredActivities = [...mockActivities]
     
-    // 根据分类筛选
     if (selectedCategory !== '全部') {
-      filtered = filtered.filter(a => a.category === selectedCategory)
+      filteredActivities = mockActivities.filter(
+        activity => activity.category === selectedCategory
+      )
     }
     
-    // 更新已报名状态
-    filtered = filtered.map(activity => ({
-      ...activity,
-      status: signedIds.includes(activity.id) ? 'signed' : activity.status
-    }))
-    
-    setActivities(filtered)
-  }, [selectedCategory, signedIds])
+    setActivities(filteredActivities)
+  }, [selectedCategory])
 
   useEffect(() => {
+    loadActivities()
     loadSignedData()
-  }, [loadSignedData])
+  }, [loadActivities, loadSignedData])
 
-  useEffect(() => {
-    filterActivities()
-  }, [filterActivities])
+  // 选择分类
+  const handleCategorySelect = (category: Category) => {
+    setSelectedCategory(category)
+  }
 
-  // 点击活动卡片
+  // 点击时光照相馆
+  const handlePhotoStudioClick = () => {
+    Taro.showModal({
+      title: '时光照相馆',
+      content: 'AI老照片修复功能正在开发中，敬请期待！',
+      showCancel: false,
+      confirmText: '知道了'
+    })
+  }
+
+  // 跳转活动详情
   const handleActivityClick = (activityId: string) => {
     Taro.navigateTo({
       url: `/pages/activity-detail/index?id=${activityId}`
     })
   }
 
-  // 点击时光照相馆
-  const handlePhotoStudioClick = () => {
-    setShowPhotoStudioTip(true)
-    setTimeout(() => setShowPhotoStudioTip(false), 2000)
-  }
-
-  // 切换分类
-  const handleCategoryChange = (category: Category) => {
-    setSelectedCategory(category)
+  // 分类按钮样式
+  const getCategoryBtnClass = (category: Category) => {
+    const baseClass = 'px-6 py-4 rounded-full text-lg font-medium transition-all whitespace-nowrap'
+    if (selectedCategory === category) {
+      return `${baseClass} bg-primary text-white shadow-md`
+    }
+    return `${baseClass} bg-white text-foreground border-2 border-border`
   }
 
   return (
-    <View className="min-h-screen bg-background">
+    <View className="min-h-screen bg-background pb-20">
+      {/* 页面标题 */}
+      <View className="bg-white border-b border-border px-5 py-5">
+        <Text className="block text-3xl font-bold text-foreground">活动中心</Text>
+        <Text className="block text-lg text-muted-foreground mt-1">发现精彩社区活动</Text>
+      </View>
+
       {/* 顶部功能卡片 - 时光照相馆 */}
       <View 
         className="mx-4 mt-4 rounded-2xl overflow-hidden card-shadow"
         onClick={handlePhotoStudioClick}
       >
         <View className="relative">
-          <Image
-            src="https://images.unsplash.com/photo-1504610926078-a1611febcad3?w=800&q=80"
-            className="w-full h-36 object-cover"
+          <SafeImage
+            src="https://images.unsplash.com/photo-1504610926078-a1611febcad3?w=800&q=60"
+            className="w-full h-36"
             mode="aspectFill"
-            onError={handleImageError}
           />
           <View className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-300 flex items-center px-6">
             <View className="flex items-center gap-4">
-              {/* 方形图标 */}
-              <View className="w-16 h-16 bg-white bg-opacity-30 rounded-xl flex items-center justify-center">
-                <Image 
-                  src="https://images.unsplash.com/photo-1562583277-333d8dca6415?w=400&q=60" 
-                  className="w-16 h-16 rounded-xl object-cover" 
-                />
-              </View>
+              <SafeImage
+                src="https://images.unsplash.com/photo-1562583277-333d8dca6415?w=200&q=60"
+                className="w-16 h-16 rounded-xl"
+                mode="aspectFill"
+              />
               <View>
                 <Text className="block text-white text-2xl font-bold">时光照相馆</Text>
                 <Text className="block text-white text-opacity-90 text-lg mt-1">AI 老照片修复，让记忆重现</Text>
               </View>
             </View>
-            {/* 去试试按钮 */}
             <View 
               className="ml-auto bg-white rounded-full px-6 py-3 active:bg-opacity-80"
               onClick={(e) => {
@@ -129,146 +112,109 @@ export default function Index() {
                 handlePhotoStudioClick()
               }}
             >
-              <Text className="block text-primary text-2xl font-bold">去试试</Text>
+              <Text className="block text-primary text-3xl font-bold">去试试</Text>
             </View>
           </View>
         </View>
       </View>
 
-      {/* 时光照相馆提示 */}
-      {showPhotoStudioTip && (
-        <View className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-black bg-opacity-80 rounded-2xl px-10 py-8 flex items-center gap-4">
-          <View className="w-8 h-8 rounded-full bg-warning bg-opacity-80 flex items-center justify-center">
-            <Text className="block text-white text-lg">!</Text>
-          </View>
-          <Text className="block text-white text-xl">功能建设中，尽情期待！</Text>
+      {/* 分类筛选 */}
+      <ScrollView
+        scrollX
+        className="px-4 mt-4"
+        scrollWithAnimation
+        scrollLeft={0}
+      >
+        <View className="flex gap-3">
+          {CATEGORIES.map((category) => (
+            <View
+              key={category}
+              className={getCategoryBtnClass(category)}
+              onClick={() => handleCategorySelect(category)}
+            >
+              <Text className="block">{category}</Text>
+            </View>
+          ))}
         </View>
-      )}
-
-      {/* 分类筛选标签 */}
-      <View className="px-4 py-5">
-        <ScrollView
-          scrollX
-          className="whitespace-nowrap"
-          scrollWithAnimation
-        >
-          <View className="flex gap-4">
-            {CATEGORIES.map((category) => (
-              <View
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                className={`inline-flex items-center justify-center px-6 py-4 rounded-full text-lg font-medium transition-all ${
-                  selectedCategory === category
-                    ? 'bg-primary text-white shadow-lg'
-                    : 'bg-white text-foreground border-2 border-border'
-                }`}
-              >
-                <Text className={`block ${selectedCategory === category ? 'text-white' : 'text-foreground'}`}>
-                  {category}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+      </ScrollView>
 
       {/* 活动列表 */}
-      <ScrollView
-        scrollY
-        className="px-4 pb-32"
-      >
-        {activities.map((activity) => (
-          <View
-            key={activity.id}
-            className="bg-white rounded-2xl overflow-hidden card-shadow mb-5"
-            onClick={() => handleActivityClick(activity.id)}
-          >
-            {/* 活动图片 */}
-            <View className="relative">
-              <Image
-                src={activity.imageUrl}
-                className="w-full h-52 object-cover"
-                mode="aspectFill"
-                onError={handleImageError}
-              />
-              {/* 分类标签 */}
-              <View className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-full px-4 py-2">
-                <Text className="block text-primary text-base font-medium">{activity.category}</Text>
-              </View>
-              {/* 已报名角标 */}
-              {signedIds.includes(activity.id) && (
-                <View className="absolute top-4 right-4 bg-primary rounded-full px-4 py-2">
-                  <Text className="block text-white text-base font-medium">已报名</Text>
-                </View>
-              )}
-            </View>
-
-            {/* 活动信息 */}
-            <View className="p-5">
-              <Text className="block text-xl font-bold text-foreground mb-4 leading-tight">
-                {activity.title}
-              </Text>
-
-              <View className="flex items-center gap-3 mb-3">
-                <Calendar color="#FF6B00" size={22} />
-                <Text className="block text-lg text-foreground">{activity.date}</Text>
-              </View>
-
-              <View className="flex items-center gap-3 mb-3">
-                <Clock color="#666666" size={22} />
-                <Text className="block text-base text-foreground-light">{activity.time}</Text>
-              </View>
-
-              <View className="flex items-center gap-3 mb-5">
-                <MapPin color="#666666" size={22} />
-                <Text className="block text-base text-foreground-light truncate">{activity.location}</Text>
-              </View>
-
-              {/* 底部状态栏 */}
-              <View className="flex items-center justify-between pt-4 border-t border-border">
-                <View className="flex items-center gap-2">
-                  <Text className="block text-base text-muted-foreground">
-                    已报名 {activity.enrolled}/{activity.capacity} 人
-                  </Text>
-                </View>
-                <View 
-                  className={`flex items-center gap-2 px-5 py-3 rounded-full text-lg font-medium ${
-                    activity.status === 'available'
-                      ? 'bg-primary text-white'
-                      : activity.status === 'full'
-                      ? 'bg-warning text-white'
-                      : 'bg-muted text-muted-foreground'
+      <ScrollView scrollY className="px-4 mt-4" style={{ height: 'calc(100vh - 380px)' }}>
+        {activities.map((activity) => {
+          const isSigned = signedIds.includes(activity.id)
+          const isFull = activity.status === 'full'
+          
+          return (
+            <View
+              key={activity.id}
+              className="bg-white rounded-2xl card-shadow mb-4 overflow-hidden"
+              onClick={() => handleActivityClick(activity.id)}
+            >
+              {/* 活动图片 */}
+              <View className="relative">
+                <SafeImage
+                  src={activity.imageUrl}
+                  className="w-full h-52"
+                  mode="aspectFill"
+                />
+                {/* 状态标签 */}
+                <View
+                  className={`absolute top-4 right-4 px-4 py-2 rounded-full ${
+                    isSigned
+                      ? 'bg-success'
+                      : isFull
+                        ? 'bg-muted-foreground'
+                        : 'bg-primary'
                   }`}
                 >
-                  <Text className={`block ${
-                    activity.status === 'available'
-                      ? 'text-white'
-                      : activity.status === 'full'
-                      ? 'text-white'
-                      : 'text-muted-foreground'
-                  }`}
-                  >
-                    {getStatusText(activity.status)}
+                  <Text className="block text-white text-base font-medium">
+                    {isSigned ? '已报名' : isFull ? '名额已满' : '立即报名'}
                   </Text>
-                  {activity.status === 'available' && (
-                    <ChevronRight 
-                      size={20} 
-                      color={activity.status === 'available' ? '#FFFFFF' : '#999999'} 
-                    />
-                  )}
+                </View>
+              </View>
+
+              {/* 活动信息 */}
+              <View className="p-5">
+                <Text className="block text-xl font-bold text-foreground mb-3">
+                  {activity.title}
+                </Text>
+                
+                <View className="flex items-center gap-2 mb-2">
+                  <Calendar color="#999999" size={20} />
+                  <Text className="block text-base text-muted-foreground">
+                    {activity.date}
+                  </Text>
+                </View>
+                
+                <View className="flex items-center gap-2 mb-2">
+                  <MapPin color="#999999" size={20} />
+                  <Text className="block text-base text-muted-foreground">
+                    {activity.location}
+                  </Text>
+                </View>
+                
+                <View className="flex items-center gap-2">
+                  <Clock color="#999999" size={20} />
+                  <Text className="block text-base text-muted-foreground">
+                    {activity.time}
+                  </Text>
                 </View>
               </View>
             </View>
-          </View>
-        ))}
+          )
+        })}
 
         {/* 空状态 */}
         {activities.length === 0 && (
-          <View className="flex flex-col items-center justify-center py-20">
-            <Text className="block text-2xl text-muted-foreground mb-2">暂无活动</Text>
-            <Text className="block text-base text-muted-foreground">敬请期待更多精彩活动</Text>
+          <View className="flex flex-col items-center justify-center py-24">
+            <Calendar color="#CCCCCC" size={80} />
+            <Text className="block text-xl text-muted-foreground mt-4">暂无活动</Text>
+            <Text className="block text-base text-muted-foreground mt-2">敬请期待更多精彩活动</Text>
           </View>
         )}
+
+        {/* 底部留白 */}
+        <View className="h-8" />
       </ScrollView>
     </View>
   )

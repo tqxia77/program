@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { 
@@ -17,6 +17,7 @@ import {
   type Post 
 } from '../../store/mock-data'
 import { useFontMode } from '../../store/font-mode'
+import { SafeImage } from '../../components/safe-image'
 
 export default function Profile() {
   const [userName, setUserName] = useState('银龄用户')
@@ -116,18 +117,6 @@ export default function Profile() {
     })
   }
 
-  // 图片加载失败处理（兼容H5和小程序）
-  const handleImageError = (e: any) => {
-    try {
-      const target = e?.target || e?.srcElement
-      if (target && target.src) {
-        target.src = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80'
-      }
-    } catch (err) {
-      // 静默处理错误
-    }
-  }
-
   // 大字体调节
   const handleFontSizeAdjust = () => {
     toggleFontMode()
@@ -145,11 +134,10 @@ export default function Profile() {
       <View className="bg-gradient-to-br from-primary to-primary-dark px-4 pt-8 pb-12">
         <View className="flex items-center">
           <View className="relative">
-            <Image
-              src={userAvatar || 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=80'}
-              className="w-28 h-28 rounded-full object-cover border-4 border-white border-opacity-30"
+            <SafeImage
+              src={userAvatar || 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=200&q=60'}
+              className="w-28 h-28 rounded-full"
               mode="aspectFill"
-              onError={handleImageError}
             />
             <View className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-2 border-white" />
           </View>
@@ -191,11 +179,10 @@ export default function Profile() {
                   key={activity.id}
                   className="flex items-center gap-4 py-4 border-b border-border last:border-0"
                 >
-                  <Image
+                  <SafeImage
                     src={activity.imageUrl}
-                    className="w-20 h-20 rounded-xl object-cover"
+                    className="w-20 h-20 rounded-xl"
                     mode="aspectFill"
-                    onError={handleImageError}
                   />
                   <View className="flex-1 min-w-0">
                     <Text className="block text-lg font-medium text-foreground truncate">
@@ -257,11 +244,10 @@ export default function Profile() {
                     <View className="flex items-start gap-3 mb-2">
                       <View className="flex-1">
                         <View className="flex items-center gap-3 mb-2">
-                          <Image
+                          <SafeImage
                             src={post.userAvatar}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-10 h-10 rounded-full"
                             mode="aspectFill"
-                            onError={handleImageError}
                           />
                           <View className="flex-1">
                             <Text className="block text-base font-medium text-foreground">{post.userName}</Text>
@@ -274,12 +260,11 @@ export default function Profile() {
                         {post.images.length > 0 && (
                           <View className="flex gap-2 flex-wrap mb-2">
                             {post.images.map((img, index) => (
-                              <Image
+                              <SafeImage
                                 key={index}
                                 src={img}
-                                className="w-20 h-20 rounded-lg object-cover"
+                                className="w-20 h-20 rounded-lg"
                                 mode="aspectFill"
-                                onError={handleImageError}
                               />
                             ))}
                           </View>
