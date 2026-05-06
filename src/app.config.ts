@@ -13,6 +13,8 @@ const config: any = {
     'pages/notification-settings/index',
     'pages/enrollees/index',
     'pages/post-detail/index',
+    'pages/friends/index',
+    'pages/friend-requests/index',
     'pages/admin/activities/index',
     'pages/admin/activities/publish'
   ],

@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
-import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X, CalendarPlus } from 'lucide-react-taro'
+import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X, CalendarPlus, UserPlus, UserCheck } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { 
   getUserProfile, 
@@ -136,6 +136,20 @@ export default function Profile() {
   const handleNotificationSettings = () => {
     Taro.navigateTo({
       url: '/pages/notification-settings/index'
+    })
+  }
+
+  // 跳转到好友列表页面
+  const handleFriends = () => {
+    Taro.navigateTo({
+      url: '/pages/friends/index'
+    })
+  }
+
+  // 跳转到好友请求页面
+  const handleFriendRequests = () => {
+    Taro.navigateTo({
+      url: '/pages/friend-requests/index'
     })
   }
 
@@ -351,6 +365,18 @@ export default function Profile() {
               title: '我的点赞', 
               icon: Heart,
               action: handleMyLikes
+            },
+            { 
+              id: 'friends', 
+              title: '我的关注', 
+              icon: UserCheck,
+              action: handleFriends
+            },
+            { 
+              id: 'friend-requests', 
+              title: '好友请求', 
+              icon: UserPlus,
+              action: handleFriendRequests
             },
             { 
               id: 'notification-settings', 
