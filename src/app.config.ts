@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const config: any = {
   pages: [
+    'pages/login/index',
     'pages/index/index',
     'pages/neighborhood/index',
     'pages/profile/index',
