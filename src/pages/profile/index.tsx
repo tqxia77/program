@@ -125,6 +125,20 @@ export default function Profile() {
     })
   }
 
+  // 跳转到我的点赞页面
+  const handleMyLikes = () => {
+    Taro.navigateTo({
+      url: '/pages/my-likes/index'
+    })
+  }
+
+  // 跳转到通知设置页面
+  const handleNotificationSettings = () => {
+    Taro.navigateTo({
+      url: '/pages/notification-settings/index'
+    })
+  }
+
   // 大字体调节
   const handleFontSizeAdjust = () => {
     toggleFontMode()
@@ -331,6 +345,18 @@ export default function Profile() {
               title: '子女绑定设置', 
               icon: Users,
               action: handleChildBinding
+            },
+            { 
+              id: 'my-likes', 
+              title: '我的点赞', 
+              icon: Heart,
+              action: handleMyLikes
+            },
+            { 
+              id: 'notification-settings', 
+              title: '通知设置', 
+              icon: Bell,
+              action: handleNotificationSettings
             },
             { 
               id: 'settings', 

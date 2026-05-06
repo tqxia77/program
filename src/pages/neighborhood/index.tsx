@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { Input } from '@/components/ui/input'
-import { Heart, MessageCircle, Plus } from 'lucide-react-taro'
+import { Heart, MessageCircle, Plus, Volume2 } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { getPosts, togglePostLike, getLikedPostIds, type Post } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
@@ -119,6 +119,13 @@ export default function Neighborhood() {
     })
   }
 
+  // 跳转到帖子详情
+  const handlePostClick = (postId: string) => {
+    Taro.navigateTo({
+      url: `/pages/post-detail/index?id=${postId}`
+    })
+  }
+
   return (
     <View className={`min-h-screen bg-background pb-20 ${fontModeClass}`}>
       {/* 页面标题 */}
@@ -148,10 +155,13 @@ export default function Neighborhood() {
                 <Text className="block text-xl font-bold text-foreground">{post.userName}</Text>
                 <Text className="block text-base text-muted-foreground">{post.publishTime}</Text>
               </View>
+              <View onClick={() => handlePostClick(post.id)}>
+                <Text className="block text-base text-primary">查看详情</Text>
+              </View>
             </View>
 
             {/* 文字内容 */}
-            <View className="px-5 pb-4">
+            <View className="px-5 pb-2">
               <Text className="block text-lg text-foreground leading-relaxed whitespace-pre-wrap">
                 {post.content}
               </Text>
@@ -192,6 +202,21 @@ export default function Neighborhood() {
                 >
                   {post.likes}
                 </Text>
+              </View>
+
+              {/* 听帖子按钮 */}
+              <View 
+                className="flex items-center gap-3 ml-4 px-5 py-3 rounded-full transition-colors bg-secondary"
+                onClick={() => {
+                  const audio = new window.Audio()
+                  audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA='
+                  audio.play().catch(() => {
+                    Taro.showToast({ title: '正在朗读...', icon: 'none' })
+                  })
+                }}
+              >
+                <Volume2 size={24} color="#666666" />
+                <Text className="block text-lg text-foreground">听帖子</Text>
               </View>
 
               <View 

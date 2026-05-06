@@ -439,6 +439,36 @@ export const togglePostLike = (postId: string): boolean => {
 }
 
 /**
+ * 保存点赞的动态ID
+ */
+export const saveLikedPostId = (postId: string): string[] => {
+  try {
+    const likedIds = getLikedPostIds()
+    if (!likedIds.includes(postId)) {
+      likedIds.push(postId)
+      Taro.setStorageSync(STORAGE_KEYS.LIKED_POSTS, JSON.stringify(likedIds))
+    }
+    return likedIds
+  } catch {
+    return []
+  }
+}
+
+/**
+ * 移除点赞的动态ID
+ */
+export const removeLikedPostId = (postId: string): string[] => {
+  try {
+    const likedIds = getLikedPostIds()
+    const newLikedIds = likedIds.filter(id => id !== postId)
+    Taro.setStorageSync(STORAGE_KEYS.LIKED_POSTS, JSON.stringify(newLikedIds))
+    return newLikedIds
+  } catch {
+    return []
+  }
+}
+
+/**
  * 获取当前用户自己发布的动态
  */
 export const getUserPosts = (): Post[] => {

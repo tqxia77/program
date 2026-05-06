@@ -1,48 +1,37 @@
 /**
  * 银龄乐圈 - 发布动态页面
- * 支持发布文字内容和图片
+ * 支持发布文字内容、语音和图片
  */
 
 import { useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { ChevronLeft, ImagePlus, Send, X } from 'lucide-react-taro'
 import { Textarea } from '@/components/ui/textarea'
+import { ChevronLeft } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { addLocalPost, getUserProfile } from '../../store/mock-data'
-import { SafeImage } from '../../components/safe-image'
-import { useFontMode } from '../../store/font-mode'
+import { addLocalPost, getUserProfile } from '@/store/mock-data'
+import { useFontMode } from '@/store/font-mode'
+import { VoicePost } from '@/components/voice'
+import { ImagePicker } from '@/components/image-picker'
 
 export default function Publish() {
   const [content, setContent] = useState('')
   const [images, setImages] = useState<string[]>([])
+  const [voiceText, setVoiceText] = useState('')
   const [isPublishing, setIsPublishing] = useState(false)
   const { fontMode } = useFontMode()
   const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
-  // 选择图片
-  const handleChooseImage = () => {
-    if (images.length >= 9) {
-      Taro.showToast({
-        title: '最多选择9张图片',
-        icon: 'none'
-      })
-      return
+  // 语音识别结果回调
+  const handleVoiceResult = (text: string) => {
+    setVoiceText(prev => prev + text)
+    if (text) {
+      setContent(prev => prev + text)
     }
-
-    Taro.chooseImage({
-      count: 9 - images.length,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
-      success: (res) => {
-        const tempFilePaths = res.tempFilePaths as string[]
-        setImages(prev => [...prev, ...tempFilePaths])
-      }
-    })
   }
 
-  // 删除图片
-  const handleRemoveImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index))
+  // 选择图片
+  const handleImagesChange = (newImages: any[]) => {
+    setImages(newImages.map((img: any) => typeof img === 'string' ? img : img.url))
   }
 
   // 返回上一页
@@ -52,9 +41,9 @@ export default function Publish() {
 
   // 发布动态
   const handlePublish = async () => {
-    if (!content.trim()) {
+    if (!content.trim() && images.length === 0) {
       Taro.showToast({
-        title: '请输入内容',
+        title: '请输入内容或添加图片',
         icon: 'none'
       })
       return
@@ -72,7 +61,7 @@ export default function Publish() {
       userId: user.id,
       userName: user.name,
       userAvatar: user.avatar,
-      content: content.trim(),
+      content: content.trim() || (voiceText ? `[语音内容]${voiceText}` : ''),
       images: images
     })
 
@@ -98,128 +87,84 @@ export default function Publish() {
     <View className={`min-h-screen bg-background flex flex-col ${fontModeClass}`}>
       {/* 顶部导航栏 */}
       <View 
-        className="bg-white border-b border-border px-5"
+        className="bg-white border-b border-border"
         style={{ paddingTop: statusBarHeight + 'px' }}
       >
-        <View className="flex items-center justify-between h-16">
+        <View className="flex items-center justify-between px-4 py-4">
           <View 
-            className="w-12 h-12 flex items-center justify-center rounded-full"
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-secondary"
             onClick={handleGoBack}
           >
-            <ChevronLeft color="#333333" size={30} />
+            <ChevronLeft size={28} color="#333333" />
           </View>
-          <Text className="text-2xl font-bold text-foreground">发布动态</Text>
-          <View 
-            className={`px-6 py-3 rounded-full text-xl font-medium ${
-              content.trim() 
-                ? 'bg-primary text-white' 
-                : 'bg-muted text-muted-foreground'
-            }`}
-            onClick={handlePublish}
-          >
-            {isPublishing ? '发布中...' : '发布'}
-          </View>
+          <Text className="block text-2xl font-bold text-foreground">发布动态</Text>
+          <View className="w-12" />
         </View>
       </View>
 
-      {/* 内容输入区 */}
-      <ScrollView 
-        scrollY 
-        className="flex-1 px-5 py-5"
-      >
-        <View className="bg-white rounded-2xl p-5 card-shadow">
-          <Textarea
-            value={content}
-            onInput={(e) => setContent((e.detail as any).value)}
-            placeholder="分享今天的新鲜事..."
-            className="w-full min-h-56 text-lg text-foreground leading-relaxed bg-transparent"
-            maxlength={500}
-          />
-          
-          {/* 字数统计 */}
-          <View className="flex justify-end mt-3">
-            <Text className="text-base text-muted-foreground">
-              {content.length}/500
-            </Text>
-          </View>
-        </View>
-
-        {/* 图片区域 */}
-        <View className="mt-5">
-          <Text className="block text-xl font-medium text-foreground mb-4">添加图片</Text>
-          
-          <View className="flex flex-wrap gap-4">
-            {/* 已选择的图片 */}
-            {images.map((img, index) => (
-              <View key={index} className="relative">
-                <SafeImage
-                  src={img}
-                  className="w-28 h-28 rounded-xl"
-                  mode="aspectFill"
-                />
-                <View 
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-black bg-opacity-60 rounded-full flex items-center justify-center"
-                  onClick={() => handleRemoveImage(index)}
-                >
-                  <X color="#FFFFFF" size={16} />
-                </View>
-              </View>
-            ))}
-
-            {/* 添加图片按钮 */}
-            {images.length < 9 && (
-              <View 
-                className="w-28 h-28 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-white"
-                onClick={handleChooseImage}
+      <ScrollView scrollY className="flex-1">
+        <View className="p-5">
+          {/* 文字输入区域 */}
+          <View className="bg-white rounded-2xl p-4 mb-4">
+            <View className="bg-gray-50 rounded-xl p-3">
+              <Text 
+                className="block text-lg text-foreground leading-relaxed min-h-32"
+                style={{ minHeight: '128px' }}
               >
-                <ImagePlus color="#999999" size={36} />
-                <Text className="block text-base text-muted-foreground mt-2">
-                  {images.length > 0 ? '继续添加' : '点击添加'}
-                </Text>
-              </View>
-            )}
+                {content || '说点什么吧...'}
+              </Text>
+            </View>
+            <Textarea
+              value={content}
+              onInput={(e: any) => setContent(e.detail.value)}
+              placeholder="说点什么吧..."
+              className="mt-3 bg-transparent text-lg"
+              style={{ 
+                backgroundColor: 'transparent',
+                minHeight: '120px'
+              }}
+              maxlength={500}
+            />
+            <View className="flex justify-end mt-2">
+              <Text className="text-base text-muted-foreground">{content.length}/500</Text>
+            </View>
           </View>
 
-          {/* 图片数量提示 */}
-          {images.length === 0 && (
-            <Text className="block text-base text-muted-foreground mt-4">
-              最多可添加9张图片
-            </Text>
-          )}
-        </View>
+          {/* 语音发帖组件 */}
+          <View className="mb-4">
+            <Text className="block text-lg font-medium text-foreground mb-3">按住说话</Text>
+            <VoicePost 
+              onSubmit={handleVoiceResult}
+            />
+          </View>
 
-        {/* 发布按钮 */}
-        <View className="mt-10">
-          <View 
-            className={`w-full py-5 rounded-2xl flex items-center justify-center gap-3 ${
-              content.trim() 
-                ? 'bg-primary' 
-                : 'bg-muted'
-            }`}
-            onClick={handlePublish}
-          >
-            {isPublishing ? (
-              <>
-                <Send color="#FFFFFF" size={26} />
-                <Text className="block text-white text-xl font-bold">发布中...</Text>
-              </>
-            ) : (
-              <>
-                <Send color={content.trim() ? '#FFFFFF' : '#999999'} size={26} />
-                <Text className={`block text-xl font-bold ${
-                  content.trim() ? 'text-white' : 'text-muted-foreground'
-                }`}
-                >
-                  确认发布
-                </Text>
-              </>
-            )}
+          {/* 图片上传组件 */}
+          <View className="mb-4">
+            <Text className="block text-lg font-medium text-foreground mb-3">添加图片（可选，最多9张）</Text>
+            <ImagePicker
+              images={images.map((url, idx) => ({ id: `img-${idx}`, url }))}
+              onChange={handleImagesChange}
+              maxCount={9}
+            />
           </View>
         </View>
-
-        {/* 底部留白 */}
-        <View className="h-20" />
       </ScrollView>
+
+      {/* 底部发布按钮 */}
+      <View className="bg-white border-t border-border p-4 pb-8">
+        <View 
+          className={`flex items-center justify-center py-4 rounded-xl ${
+            isPublishing 
+              ? 'bg-gray-300' 
+              : 'bg-primary active:bg-orange-600'
+          }`}
+          onClick={isPublishing ? undefined : handlePublish}
+        >
+          <Text className="block text-xl font-bold text-white">
+            {isPublishing ? '发布中...' : '发布'}
+          </Text>
+        </View>
+      </View>
     </View>
   )
 }

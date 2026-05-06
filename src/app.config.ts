@@ -9,6 +9,10 @@ const config: any = {
     'pages/publish/index',
     'pages/edit-profile/index',
     'pages/child-binding/index',
+    'pages/my-likes/index',
+    'pages/notification-settings/index',
+    'pages/enrollees/index',
+    'pages/post-detail/index',
     'pages/admin/activities/index',
     'pages/admin/activities/publish'
   ],
