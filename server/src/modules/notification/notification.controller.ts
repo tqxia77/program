@@ -1,10 +1,10 @@
-import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+﻿import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { Auth } from '../../../common/decorators/auth.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { ResponseUtils } from '../../../common/utils/response.util';
-import { User } from '../../../entities/user.entity';
+import { Auth } from '../../common/decorators/auth.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ResponseUtils } from '../../common/utils/response.util';
+import { User } from '../../entities/user.entity';
 
 @Controller('user/notification-settings')
 export class NotificationController {

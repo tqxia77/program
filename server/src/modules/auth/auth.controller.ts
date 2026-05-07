@@ -1,11 +1,11 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+﻿import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { Auth } from '../../../common/decorators/auth.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { ResponseUtils } from '../../../common/utils/response.util';
-import { User } from '../../../entities/user.entity';
+import { Auth } from '../../common/decorators/auth.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ResponseUtils } from '../../common/utils/response.util';
+import { User } from '../../entities/user.entity';
 
 @Controller('auth')
 export class AuthController {

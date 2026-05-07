@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Post,
   UseInterceptors,
@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import { Auth } from '../../../common/decorators/auth.decorator';
-import { ResponseUtils } from '../../../common/utils/response.util';
+import { Auth } from '../../common/decorators/auth.decorator';
+import { ResponseUtils } from '../../common/utils/response.util';
 
 @Controller('upload')
 export class UploadController {
@@ -31,7 +31,7 @@ export class UploadController {
     }),
   )
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const result = await this.uploadService.uploadImage(file);
+    const result = await this.uploadService.uploadFile(file);
     return ResponseUtils.success(result, '上传成功');
   }
 }

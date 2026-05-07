@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   UnauthorizedException,
   Logger,
@@ -11,7 +11,6 @@ import { ConfigService } from '@nestjs/config';
 import { User, UserRole } from '../../entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { NotificationSettings } from '../../entities/notification-settings.entity';
 
 @Injectable()
 export class AuthService {
@@ -20,8 +19,6 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(NotificationSettings)
-    private notificationRepository: Repository<NotificationSettings>,
     private jwtService: JwtService,
     private httpService: HttpService,
     private configService: ConfigService,
@@ -70,28 +67,25 @@ export class AuthService {
 
     // ============ 步骤2：查找或创建用户 ============
     let user = await this.userRepository.findOne({
-      where: { wechatOpenid: openid },
+      where: { openid: openid },
     });
 
     if (!user) {
       // 新用户注册
       user = this.userRepository.create({
-        wechatOpenid: openid,
+        openid: openid,
         nickname: nickname || `用户${Date.now() % 10000}`,
         avatar: avatar || '',
-        role: role || UserRole.ELDER,
+        role: (role as UserRole) || 'elder',
+        notificationSettings: {
+          smsEnabled: true,
+          callEnabled: true,
+          activityReminder: true,
+          commentReminder: true,
+          likeReminder: true,
+        },
       });
       user = await this.userRepository.save(user);
-
-      // 创建默认通知设置
-      await this.notificationRepository.save({
-        userId: user.id,
-        smsEnabled: true,
-        callEnabled: true,
-        activityReminder: true,
-        commentReminder: true,
-        likeReminder: true,
-      });
 
       this.logger.log(`新用户注册: ${user.id}`);
     } else {
@@ -123,7 +117,7 @@ export class AuthService {
   private generateToken(user: User): string {
     const payload = {
       sub: user.id,
-      openid: user.wechatOpenid,
+      openid: user.openid,
       role: user.role,
     };
     return this.jwtService.sign(payload, {

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Follow, FriendRequest, Friend } from '../../../entities/social.entity';
-import { User } from '../../../entities/user.entity';
-import { SendFriendRequestDto } from '../dto/friend-request.dto';
+import { Follow, FriendRequest, Friend } from '../../entities/social.entity';
+import { User } from '../../entities/user.entity';
+import { SendFriendRequestDto } from './dto/friend-request.dto';
 
 @Injectable()
 export class SocialService {
