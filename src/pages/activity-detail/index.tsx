@@ -9,7 +9,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { Calendar, MapPin, Users, ChevronLeft, Loader } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { Network } from '@/network'
-import { getSignedActivityIds, saveSignedActivityId, removeSignedActivityId, type Activity } from '../../store/mock-data'
+import { mockActivities, getSignedActivityIds, saveSignedActivityId, removeSignedActivityId, type Activity } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
 import { useFontMode } from '../../store/font-mode'
 
@@ -29,12 +29,12 @@ export default function ActivityDetail() {
       if (activityId) {
         setIsLoading(true)
         try {
-          console.log('[ActivityDetail] 加载活动详情:', activityId)
+          console.log('[ActivityDetail] 尝试加载活动详情:', activityId)
           const res = await Network.request({
             url: `/api/activities/${activityId}`,
             method: 'GET'
           })
-          console.log('[ActivityDetail] 响应:', res.data)
+          console.log('[ActivityDetail] API响应:', res.data)
 
           if (res.data?.code === 200) {
             const data = res.data.data
@@ -48,12 +48,24 @@ export default function ActivityDetail() {
               ...data,
               status: signed ? 'signed' : data.status
             })
+            console.log('[ActivityDetail] 使用API数据')
+            return
           }
         } catch (error) {
-          console.error('[ActivityDetail] 加载失败:', error)
-          Taro.showToast({ title: '加载失败', icon: 'none' })
-        } finally {
-          setIsLoading(false)
+          console.log('[ActivityDetail] API失败，使用Mock数据:', error)
+        }
+        
+        // API失败时使用Mock数据
+        const mockActivity = mockActivities.find(a => a.id === activityId)
+        if (mockActivity) {
+          const signedIds = getSignedActivityIds()
+          const signed = signedIds.includes(activityId)
+          setIsSigned(signed)
+          setActivity({
+            ...mockActivity,
+            status: signed ? 'signed' : mockActivity.status
+          })
+          console.log('[ActivityDetail] 使用Mock数据')
         }
       }
     }

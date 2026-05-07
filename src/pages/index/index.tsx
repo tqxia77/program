@@ -9,7 +9,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { Calendar, MapPin, Clock, Settings } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { Network } from '@/network'
-import { getSignedActivityIds, type Activity } from '../../store/mock-data'
+import { mockActivities, getSignedActivityIds, type Activity } from '../../store/mock-data'
 import { SafeImage } from '../../components/safe-image'
 import { useFontMode } from '../../store/font-mode'
 
@@ -32,16 +32,16 @@ export default function Index() {
     setSignedIds(ids)
   }, [])
 
-  // 加载活动数据（从后端 API）
+  // 加载活动数据（优先从后端API，失败则使用Mock数据）
   const loadActivities = useCallback(async () => {
     setLoading(true)
     try {
-      console.log('[ActivityCenter] 加载活动列表')
+      console.log('[ActivityCenter] 尝试加载活动列表')
       const res = await Network.request({
         url: '/api/activities',
         method: 'GET'
       })
-      console.log('[ActivityCenter] 响应数据:', res.data)
+      console.log('[ActivityCenter] API响应数据:', res.data)
       
       if (res.data?.code === 200) {
         let data = res.data.data || []
@@ -57,13 +57,22 @@ export default function Index() {
         )
         
         setActivities(data)
+        console.log('[ActivityCenter] 使用API数据，共', data.length, '条')
+        return
       }
     } catch (error) {
-      console.error('[ActivityCenter] 加载失败:', error)
-      Taro.showToast({ title: '加载失败', icon: 'none' })
-    } finally {
-      setLoading(false)
+      console.log('[ActivityCenter] API请求失败，使用Mock数据:', error)
     }
+    
+    // API失败时使用Mock数据
+    let data = [...mockActivities]
+    if (selectedCategory !== '全部') {
+      data = data.filter((a) => a.category === selectedCategory)
+    }
+    data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    setActivities(data)
+    console.log('[ActivityCenter] 使用Mock数据，共', data.length, '条')
+    setLoading(false)
   }, [selectedCategory])
 
   useEffect(() => {
