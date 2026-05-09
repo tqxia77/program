@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   BadRequestException,
   Logger,
@@ -180,7 +180,7 @@ export class UploadService {
       const policy = Buffer.from(
         JSON.stringify({
           expiration: new Date(Date.now() + 3600 * 1000).toISOString(),
-          conditions: [['content-length-range', 0, maxFileSize]],
+          conditions: [['content-length-range', 0, 10 * 1024 * 1024]],
         }),
       ).toString('base64');
 

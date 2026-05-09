@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -14,11 +14,11 @@ import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { SignUpActivityDto } from './dto/sign-up-activity.dto';
 import { QueryActivitiesDto } from './dto/query-activities.dto';
-import { Auth } from '../../../common/decorators/auth.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { ResponseUtils } from '../../../common/utils/response.util';
-import { User } from '../../../entities/user.entity';
-import { AdminGuard } from '../../../common/guards/admin.guard';
+import { Auth } from '../../common/decorators/auth.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ResponseUtils } from '../../common/utils/response.util';
+import { User } from '../../entities/user.entity';
+import { AdminGuard } from '../../common/guards/admin.guard';
 
 @Controller('activities')
 export class ActivitiesController {
@@ -87,7 +87,15 @@ export class ActivitiesController {
     return ResponseUtils.success(result);
   }
 
-  // ========== 管理员接口 ==========
+}
+
+/**
+ * 管理员活动接口控制器
+ * base path: /api/admin/activities
+ */
+@Controller('admin/activities')
+export class AdminActivitiesController {
+  constructor(private readonly activitiesService: ActivitiesService) {}
 
   /**
    * 创建活动（管理员）

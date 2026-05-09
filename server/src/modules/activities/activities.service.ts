@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Activity, ActivityStatus } from '../../../entities/activity.entity';
-import { ActivityEnrollment } from '../../../entities/activity-enrollment.entity';
-import { CreateActivityDto } from '../dto/create-activity.dto';
-import { UpdateActivityDto } from '../dto/update-activity.dto';
-import { SignUpActivityDto } from '../dto/sign-up-activity.dto';
-import { QueryActivitiesDto } from '../dto/query-activities.dto';
+import { Activity, ActivityStatus } from '../../entities/activity.entity';
+import { ActivityEnrollment } from '../../entities/activity-enrollment.entity';
+import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
+import { SignUpActivityDto } from './dto/sign-up-activity.dto';
+import { QueryActivitiesDto } from './dto/query-activities.dto';
 
 @Injectable()
 export class ActivitiesService {
@@ -101,7 +101,7 @@ export class ActivitiesService {
     const activity = this.activityRepository.create({
       ...dto,
       organizerId,
-    });
+    }) as Activity;
 
     await this.activityRepository.save(activity);
     this.logger.log(`活动创建成功: ${activity.id}`);
