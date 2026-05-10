@@ -8,6 +8,9 @@ import { ActivityEnrollment } from '../../entities/activity-enrollment.entity';
 import { Post, Comment } from '../../entities/post.entity';
 import { Follow } from '../../entities/social.entity';
 
+import { Comment } from '../../entities/post.entity';
+import { Follow } from '../../entities/social.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Activity, ActivityEnrollment, Post, Comment, Follow]),
