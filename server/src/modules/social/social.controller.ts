@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { SocialService } from './social.service';
 import { SendFriendRequestDto } from './dto/friend-request.dto';
-import { Auth } from '../../../common/decorators/auth.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { ResponseUtils } from '../../../common/utils/response.util';
-import { User } from '../../../entities/user.entity';
+import { Auth } from '../../common/decorators/auth.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ResponseUtils } from '../../common/utils/response.util';
+import { User } from '../../entities/user.entity';
 
 @Controller()
 export class SocialController {

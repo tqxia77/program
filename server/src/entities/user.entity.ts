@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export type UserRole = 'elder' | 'child';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')

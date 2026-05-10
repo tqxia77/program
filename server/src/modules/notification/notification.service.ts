@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../../entities/user.entity';
-import { UpdateNotificationDto } from '../dto/update-notification.dto';
+import { User } from '../../entities/user.entity';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Injectable()
 export class NotificationService {
@@ -51,11 +51,19 @@ export class NotificationService {
     }
 
     // 合并现有设置和新设置
-    const currentSettings = user.notificationSettings || {};
+    const defaultSettings = {
+      smsEnabled: true,
+      callEnabled: true,
+      activityReminder: true,
+      commentReminder: true,
+      likeReminder: true,
+    };
+    const currentSettings = user.notificationSettings || defaultSettings;
     user.notificationSettings = {
+      ...defaultSettings,
       ...currentSettings,
       ...dto,
-    };
+    } as typeof defaultSettings;
 
     await this.userRepository.save(user);
     this.logger.log(`用户 ${userId} 更新了通知设置`);
