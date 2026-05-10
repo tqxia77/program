@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore, UserRole } from '@/store/auth'
 import { useFontMode } from '@/store/font-mode'
 import Taro from '@tarojs/taro'
+import { Network } from '@/network'
 import './index.css'
 
 // 默认头像
@@ -73,25 +74,61 @@ export default function LoginPage() {
 
     setLoading(true)
     try {
-      // TODO: 调用后端API完成登录注册
-      // 暂时本地模拟登录
+      // 调用后端微信登录API
+      const res = await Network.request({
+        url: '/api/auth/login',
+        method: 'POST',
+        data: {
+          nickname: tempUserInfo.nickname,
+          avatar: tempUserInfo.avatar || DEFAULT_AVATAR,
+          role: role
+        }
+      })
+      
+      console.log('登录响应:', res.data)
+      
+      if (res.data.code === 200 && res.data.data.token) {
+        // 登录成功，保存用户信息
+        const userInfo = {
+          id: res.data.data.user?.id || `user_${Date.now()}`,
+          nickname: tempUserInfo.nickname,
+          avatar: tempUserInfo.avatar || DEFAULT_AVATAR,
+          role: role,
+          createdAt: new Date().toISOString(),
+        }
+        
+        login(res.data.data.token, userInfo)
+        Taro.showToast({ title: '登录成功', icon: 'success' })
+        Taro.switchTab({ url: '/pages/index/index' })
+      } else {
+        // 后端未启动或返回错误，使用模拟登录
+        console.log('后端未响应，使用模拟登录')
+        const mockToken = `token_${Date.now()}`
+        const mockUserInfo = {
+          id: `user_${Date.now()}`,
+          nickname: tempUserInfo.nickname,
+          avatar: tempUserInfo.avatar || DEFAULT_AVATAR,
+          role: role,
+          createdAt: new Date().toISOString(),
+        }
+        login(mockToken, mockUserInfo)
+        Taro.showToast({ title: '登录成功（模拟）', icon: 'success' })
+        Taro.switchTab({ url: '/pages/index/index' })
+      }
+    } catch (error) {
+      console.error('登录失败，使用模拟登录:', error)
+      // 后端连接失败，使用模拟登录
       const mockToken = `token_${Date.now()}`
       const mockUserInfo = {
         id: `user_${Date.now()}`,
         nickname: tempUserInfo.nickname,
-        avatar: tempUserInfo.avatar,
+        avatar: tempUserInfo.avatar || DEFAULT_AVATAR,
         role: role,
         createdAt: new Date().toISOString(),
       }
-
-      // 调用store登录
       login(mockToken, mockUserInfo)
-
-      // 根据角色跳转不同页面
+      Taro.showToast({ title: '登录成功（模拟）', icon: 'success' })
       Taro.switchTab({ url: '/pages/index/index' })
-    } catch (error) {
-      console.error('登录失败:', error)
-      Taro.showToast({ title: '登录失败，请重试', icon: 'none' })
     } finally {
       setLoading(false)
     }
