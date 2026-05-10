@@ -1,0 +1,33 @@
+# 依赖
+node_modules/
+
+# 构建输出
+dist/
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 上传文件
+uploads/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 日志
+*.log
+npm-debug.log*
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率
+coverage/
+
+# 类型
+*.tsbuildinfo

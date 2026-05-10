@@ -1,0 +1,296 @@
+/* stylelint-disable selector-type-no-unknown */
+/* stylelint-disable at-rule-no-unknown */
+/* stylelint-disable number-max-precision */
+@import url('weapp-tailwindcss');
+
+/* ============================================
+   银龄乐圈 - 适老化设计样式变量
+   专为回迁社区老年人设计的温暖界面
+   ============================================ */
+
+/* ========== 字号模式定义 ========== */
+/* 
+ * 字号配置说明：
+ * - 默认模式：适合一般视力老年人
+ * - 大字体模式：适合视力较弱的老年人
+ * 
+ * 修改字号请在对应模式下的 --text-* 变量中修改
+ */
+
+/* 默认模式字号 */
+:root,
+page,
+root-portal,
+.font-mode-normal {
+  /* 适老化字号 - 默认模式 */
+  --text-xs: 18px;
+  --text-sm: 20px;
+  --text-base: 24px;
+  --text-lg: 28px;
+  --text-xl: 32px;
+  --text-2xl: 36px;
+  --text-3xl: 40px;
+}
+
+/* 大字体模式字号 */
+.font-mode-large {
+  /* 适老化字号 - 大字体模式 */
+  --text-xs: 30px;
+  --text-sm: 32px;
+  --text-base: 36px;
+  --text-lg: 40px;
+  --text-xl: 44px;
+  --text-2xl: 48px;
+  --text-3xl: 52px;
+}
+
+/* 暖橙色主色调 - 温暖亲切 */
+:root,
+page,
+root-portal {
+  /* 主题色彩 */
+  --primary: #FF6B00;
+  --primary-foreground: #FFFFFF;
+  --primary-light: #FFF4E6;
+  --primary-dark: #E55C00;
+  
+  /* 辅助色彩 */
+  --secondary: #FFF8F0;
+  --secondary-foreground: #8B5A2B;
+  --accent: #FFB347;
+  --accent-foreground: #8B4513;
+  
+  /* 文字色彩 - 高对比度 */
+  --foreground: #333333;
+  --foreground-light: #666666;
+  --muted-foreground: #999999;
+  
+  /* 背景色彩 */
+  --background: #FFFBF7;
+  --card: #FFFFFF;
+  --card-foreground: #333333;
+  
+  /* 功能状态色 */
+  --success: #4CAF50;
+  --success-foreground: #FFFFFF;
+  --warning: #FF9800;
+  --warning-foreground: #FFFFFF;
+  --destructive: #E53935;
+  --destructive-foreground: #FFFFFF;
+  --disabled: #CCCCCC;
+  --disabled-foreground: #999999;
+  
+  /* 边框与输入 */
+  --border: #E8E0D8;
+  --input: #F5EDE5;
+  --ring: #FF6B00;
+  
+  /* TabBar 样式 */
+  --tabbar-bg: #FFFFFF;
+  --tabbar-color: #999999;
+  --tabbar-active: #FF6B00;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* 侧边栏 */
+  --sidebar: #FFFBF7;
+  --sidebar-foreground: #333333;
+  --sidebar-primary: #FF6B00;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FFF4E6;
+  --sidebar-accent-foreground: #FF6B00;
+  --sidebar-border: #E8E0D8;
+  --sidebar-ring: #FF6B00;
+  
+  /* 代码块 */
+  --surface: #F5F5F5;
+  --code: var(--surface);
+  --code-highlight: #EBEBEB;
+  --code-number: #999999;
+  
+  /* 选择颜色 */
+  --selection: #FF6B00;
+  --selection-foreground: #FFFFFF;
+}
+
+/* ============================================
+   适老化全局样式
+   ============================================ */
+
+/* 全局字体与背景 */
+page {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background-color: #FFFBF7;
+}
+
+/* 禁用文字选择优化触摸体验 */
+view, text {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 适老化通用按钮样式 - 进一步放大 */
+.btn-primary {
+  background-color: #FF6B00 !important;
+  color: white !important;
+  border: none !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  border-radius: 16px !important;
+  padding: 16px 32px !important;
+  min-height: 56px !important;
+}
+
+.btn-secondary {
+  background-color: #FFF4E6 !important;
+  color: #FF6B00 !important;
+  border: 2px solid #FF6B00 !important;
+  font-size: 20px !important;
+  font-weight: 500 !important;
+  border-radius: 16px !important;
+  padding: 16px 32px !important;
+  min-height: 56px !important;
+}
+
+.btn-disabled {
+  background-color: #E0E0E0 !important;
+  color: #999999 !important;
+  border: none !important;
+  font-size: 20px !important;
+  border-radius: 16px !important;
+  padding: 16px 32px !important;
+  min-height: 56px !important;
+}
+
+/* 悬浮按钮 */
+.fab-button {
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 36px !important;
+  background-color: #FF6B00 !important;
+  color: white !important;
+  font-size: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.5) !important;
+}
+
+/* 卡片阴影 */
+.card-shadow {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 状态标签 - 放大便于阅读 */
+.badge-available {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  font-size: 16px !important;
+  padding: 6px 16px !important;
+  border-radius: 24px !important;
+}
+
+.badge-full {
+  background-color: #FF9800 !important;
+  color: white !important;
+  font-size: 16px !important;
+  padding: 6px 16px !important;
+  border-radius: 24px !important;
+}
+
+.badge-signed {
+  background-color: #9E9E9E !important;
+  color: white !important;
+  font-size: 16px !important;
+  padding: 6px 16px !important;
+  border-radius: 24px !important;
+}
+
+/* 暗色模式适配 */
+.dark {
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --card: #2d2d2d;
+  --card-foreground: #ffffff;
+  --primary: #FF6B00;
+  --primary-foreground: #ffffff;
+  --secondary: #3d3d3d;
+  --secondary-foreground: #ffffff;
+  --muted: #3d3d3d;
+  --muted-foreground: #b0b0b0;
+  --accent: #FFB347;
+  --accent-foreground: #ffffff;
+  --destructive: #E53935;
+  --destructive-foreground: #ffffff;
+  --border: #404040;
+  --input: #3d3d3d;
+  --ring: #FF6B00;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-5: #FF6B00;
+  --color-chart-4: #FFB347;
+  --color-chart-3: #4CAF50;
+  --color-chart-2: #2196F3;
+  --color-chart-1: #9C27B0;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-popover-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--secondary);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-selection: var(--selection);
+  --color-selection-foreground: var(--selection-foreground);
+  --color-code: var(--code);
+  --radius-full: 9999px;
+}
+
+page,
+view,
+text,
+button,
+input,
+textarea,
+label,
+scroll-view,
+image {
+  border-color: var(--border);
+}
+
+::selection {
+  background-color: var(--selection);
+  color: var(--selection-foreground);
+}
