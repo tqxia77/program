@@ -134,6 +134,35 @@ export default function LoginPage() {
     }
   }
 
+  // 快速体验登录（比赛展示用，无需后端）
+  const handleQuickLogin = async () => {
+    setLoading(true)
+    try {
+      // 模拟登录，直接保存用户信息
+      const mockToken = `demo_token_${Date.now()}`
+      const mockUserInfo = {
+        id: `demo_user_${Date.now()}`,
+        nickname: '银龄用户',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
+        role: 'elder' as UserRole,
+        createdAt: new Date().toISOString(),
+      }
+      
+      login(mockToken, mockUserInfo)
+      Taro.showToast({ title: '登录成功', icon: 'success' })
+      
+      // 延迟跳转，让用户看到提示
+      setTimeout(() => {
+        Taro.switchTab({ url: '/pages/index/index' })
+      }, 500)
+    } catch (error) {
+      console.error('快速登录失败:', error)
+      Taro.showToast({ title: '登录失败', icon: 'none' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // 跳过登录（游客模式）
   const handleSkipLogin = () => {
     const guestToken = `guest_${Date.now()}`
@@ -229,6 +258,15 @@ export default function LoginPage() {
         >
           <Text className="text-xl">V</Text>
           <Text className="text-lg font-medium">微信一键登录</Text>
+        </Button>
+
+        {/* 快速体验（比赛展示用） */}
+        <Button
+          className="w-full bg-orange-500 text-white py-4 rounded-2xl flex items-center justify-center gap-2"
+          onClick={handleQuickLogin}
+          disabled={loading}
+        >
+          <Text className="text-lg font-medium">快速体验（无需微信）</Text>
         </Button>
 
         {/* 跳过登录 */}
