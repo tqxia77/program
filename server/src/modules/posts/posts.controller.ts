@@ -12,10 +12,10 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { QueryPostsDto } from './dto/query-posts.dto';
-import { Auth } from '../../../common/decorators/auth.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { ResponseUtils } from '../../../common/utils/response.util';
-import { User } from '../../../entities/user.entity';
+import { Auth } from '../../common/decorators/auth.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ResponseUtils } from '../../common/utils/response.util';
+import { User } from '../../entities/user.entity';
 
 @Controller('posts')
 export class PostsController {

@@ -7,7 +7,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { User } from '../../entities/user.entity';
 import { ActivityEnrollment } from '../../entities/activity-enrollment.entity';
-import { Post, PostComment, PostLike } from '../../entities/post.entity';
+import { Post, Comment as PostComment, PostLike } from '../../entities/post.entity';
 import { Follow, FriendRequest } from '../../entities/social.entity';
 
 @Module({

@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from '../../../entities/post.entity';
-import { Comment } from '../../../entities/post.entity';
-import { PostLike } from '../../../entities/post.entity';
-import { CreatePostDto } from '../dto/create-post.dto';
-import { CreateCommentDto } from '../dto/create-comment.dto';
-import { QueryPostsDto } from '../dto/query-posts.dto';
+import { Post } from '../../entities/post.entity';
+import { Comment } from '../../entities/post.entity';
+import { PostLike } from '../../entities/post.entity';
+import { CreatePostDto } from './dto/create-post.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { QueryPostsDto } from './dto/query-posts.dto';
 
 @Injectable()
 export class PostsService {

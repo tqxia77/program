@@ -10,11 +10,13 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 
+// 中文分类便于展示
 export enum ActivityCategory {
-  HEALTH = 'health',
-  EDUCATION = 'education',
-  SOCIAL = 'social',
-  VOLUNTEER = 'volunteer',
+  HEALTH = '健康养生',
+  ENTERTAINMENT = '文艺娱乐',
+  SOCIAL = '社交联谊',
+  VOLUNTEER = '志愿服务',
+  OTHER = '其他',
 }
 
 export enum ActivityStatus {
@@ -32,7 +34,7 @@ export class Activity {
   @Column({ length: 100 })
   title: string;
 
-  @Column({ type: 'enum', enum: ActivityCategory })
+  @Column({ length: 50 })
   category: ActivityCategory;
 
   @Column({ length: 255, nullable: true })

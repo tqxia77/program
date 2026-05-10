@@ -29,7 +29,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() dto: RefreshTokenDto) {
-    const result = await this.authService.refresh(dto);
+    const result = await this.authService.refreshToken(dto);
     return ResponseUtils.success(result);
   }
 
@@ -41,7 +41,7 @@ export class AuthController {
   @Auth()
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user: User) {
-    await this.authService.logout(user.id);
+    await this.authService.logout();
     return ResponseUtils.success(null, '登出成功');
   }
 }

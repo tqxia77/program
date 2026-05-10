@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../../entities/user.entity';
-import { ActivityEnrollment } from '../../../entities/activity-enrollment.entity';
-import { Post } from '../../../entities/post.entity';
-import { PostLike } from '../../../entities/post.entity';
-import { Follow } from '../../../entities/social.entity';
-import { UpdateProfileDto } from '../dto/update-profile.dto';
+import { User } from '../../entities/user.entity';
+import { ActivityEnrollment } from '../../entities/activity-enrollment.entity';
+import { Post } from '../../entities/post.entity';
+import { PostLike } from '../../entities/post.entity';
+import { Follow } from '../../entities/social.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UserService {
