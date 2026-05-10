@@ -85,14 +85,25 @@ export default function Index() {
     setSelectedCategory(category)
   }
 
-  // 点击时光照相馆
-  const handlePhotoStudioClick = () => {
+  // 每日签到状态
+  const [signedToday, setSignedToday] = useState(false)
+  const [signStreak, setSignStreak] = useState(0)
+
+  // 点击每日签到
+  const handleSignInClick = () => {
+    if (signedToday) {
+      Taro.showToast({ title: '今日已签到', icon: 'success' })
+      return
+    }
     Taro.showModal({
-      title: '时光照相馆',
-      content: 'AI老照片修复功能正在开发中，敬请期待！',
+      title: '每日签到',
+      content: `恭喜！连续签到 ${signStreak + 1} 天`,
       showCancel: false,
-      confirmText: '知道了'
+      confirmText: '签到成功'
     })
+    setSignedToday(true)
+    setSignStreak(prev => prev + 1)
+    // TODO: 调用后端 API 保存签到状态
   }
 
   // 跳转活动详情
@@ -149,38 +160,33 @@ export default function Index() {
 
       {/* 可滚动内容区域 */}
       <ScrollView scrollY className="px-4" style={{ height: 'calc(100vh - 120px)' }}>
-        {/* 顶部功能卡片 - 时光照相馆 */}
+        {/* 顶部功能卡片 - 每日签到 */}
         <View 
-          className="mt-4 rounded-2xl overflow-hidden card-shadow"
-          onClick={handlePhotoStudioClick}
+          className="mt-4 rounded-2xl overflow-hidden card-shadow bg-gradient-to-r from-green-500 to-emerald-400"
+          onClick={handleSignInClick}
         >
-          <View className="relative">
-            <SafeImage
-              src="https://images.unsplash.com/photo-1504610926078-a1611febcad3?w=800&q=60"
-              className="w-full h-36"
-              mode="aspectFill"
-            />
-            <View className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-300 flex items-center px-6">
-              <View className="flex items-center gap-4">
-                <SafeImage
-                  src="https://images.unsplash.com/photo-1562583277-333d8dca6415?w=200&q=60"
-                  className="w-16 h-16 rounded-xl"
-                  mode="aspectFill"
-                />
-                <View>
-                  <Text className="block text-white text-2xl font-bold">时光照相馆</Text>
-                  <Text className="block text-white text-opacity-90 text-lg mt-1">AI 老照片修复，让记忆重现</Text>
-                </View>
+          <View className="flex items-center justify-between px-6 py-5">
+            <View className="flex items-center gap-4">
+              <View className="w-14 h-14 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+                <Calendar size={32} color="white" />
               </View>
-              <View 
-                className="ml-auto bg-white rounded-full px-6 py-3 active:bg-opacity-80"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handlePhotoStudioClick()
-                }}
-              >
-                <Text className="block text-primary text-3xl font-bold">去试试</Text>
+              <View>
+                <Text className="block text-white text-2xl font-bold">每日签到</Text>
+                <Text className="block text-white text-opacity-90 text-lg mt-1">
+                  连续签到 {signStreak} 天
+                </Text>
               </View>
+            </View>
+            <View 
+              className={`rounded-full px-5 py-3 ${signedToday ? 'bg-white bg-opacity-30' : 'bg-white active:bg-opacity-80'}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleSignInClick()
+              }}
+            >
+              <Text className="block text-white text-xl font-bold">
+                {signedToday ? '已签到' : '立即签到'}
+              </Text>
             </View>
           </View>
         </View>

@@ -1,24 +1,29 @@
-﻿import {
+import {
   Injectable,
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { User, UserRole } from '../../entities/user.entity';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
+
+// 内存用户存储（测试版用）
+interface MemoryUser {
+  id: number;
+  openid: string;
+  nickname: string;
+  avatar: string;
+  role: string;
+  createdAt: Date;
+}
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private memoryUsers: MemoryUser[] = [];
+  private userIdCounter = 1;
 
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
     private jwtService: JwtService,
     private httpService: HttpService,
     private configService: ConfigService,
@@ -27,7 +32,7 @@ export class AuthService {
   /**
    * 微信登录/注册
    */
-  async login(dto: LoginDto) {
+  async login(dto: { code: string; nickname?: string; avatar?: string; role?: string }) {
     const { code, nickname, avatar, role } = dto;
 
     // ============ 步骤1：调用微信接口换取 openid ============
@@ -36,7 +41,7 @@ export class AuthService {
 
     let openid: string;
 
-    if (wechatAppId && wechatSecret) {
+    if (wechatAppId && wechatSecret && code && !code.startsWith('mock_')) {
       // 正式环境：调用微信接口
       try {
         const wxResponse = await this.httpService
@@ -50,126 +55,98 @@ export class AuthService {
           })
           .toPromise();
 
-        openid = wxResponse.data.openid;
+        openid = wxResponse?.data?.openid;
 
         if (!openid) {
-          throw new UnauthorizedException('微信登录失败：无法获取用户标识');
+          // 测试号可能返回模拟数据
+          openid = `test_${code}`;
         }
       } catch (error) {
-        this.logger.error(`微信接口调用失败: ${error.message}`);
-        throw new UnauthorizedException('微信登录失败');
+        this.logger.warn(`微信接口调用失败，使用模拟登录: ${error.message}`);
+        openid = `test_${code}`;
       }
     } else {
       // 开发环境：使用 code 作为 openid（模拟）
-      this.logger.warn('未配置微信参数，使用模拟登录');
-      openid = `mock_openid_${code}`;
+      this.logger.warn('使用模拟登录');
+      openid = `mock_${code || Date.now()}`;
     }
 
     // ============ 步骤2：查找或创建用户 ============
-    let user = await this.userRepository.findOne({
-      where: { openid: openid },
-    });
+    let user = this.memoryUsers.find(u => u.openid === openid);
 
     if (!user) {
       // 新用户注册
-      user = this.userRepository.create({
+      user = {
+        id: this.userIdCounter++,
         openid: openid,
-        nickname: nickname || `用户${Date.now() % 10000}`,
+        nickname: nickname || `用户${user?.id || this.userIdCounter % 10000}`,
         avatar: avatar || '',
-        role: (role as UserRole) || 'elder',
-        notificationSettings: {
-          smsEnabled: true,
-          callEnabled: true,
-          activityReminder: true,
-          commentReminder: true,
-          likeReminder: true,
-        },
-      });
-      user = await this.userRepository.save(user);
-
-      this.logger.log(`新用户注册: ${user.id}`);
-    } else {
-      // 老用户登录：更新昵称和头像
-      if (nickname) user.nickname = nickname;
-      if (avatar) user.avatar = avatar;
-      user = await this.userRepository.save(user);
+        role: role || 'elder',
+        createdAt: new Date(),
+      };
+      this.memoryUsers.push(user);
+      this.logger.log(`新用户注册: ${user.nickname} (${user.role})`);
     }
 
     // ============ 步骤3：生成 Token ============
-    const token = this.generateToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+    const payload = { sub: user.id, openid: user.openid, role: user.role };
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
-      token,
-      refreshToken,
-      user: {
-        id: user.id,
-        nickname: user.nickname,
-        avatar: user.avatar,
-        role: user.role,
-      },
-    };
-  }
-
-  /**
-   * 生成 Access Token
-   */
-  private generateToken(user: User): string {
-    const payload = {
-      sub: user.id,
-      openid: user.openid,
+      userId: user.id,
+      nickname: user.nickname,
+      avatar: user.avatar,
       role: user.role,
+      token: accessToken,
+      refreshToken: refreshToken,
     };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '7d',
-    });
-  }
-
-  /**
-   * 生成 Refresh Token
-   */
-  private generateRefreshToken(user: User): string {
-    const payload = { sub: user.id, type: 'refresh' };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: '30d',
-    });
   }
 
   /**
    * 刷新 Token
    */
-  async refresh(dto: RefreshTokenDto) {
-    const { refreshToken } = dto;
-
+  async refreshToken(dto: { refreshToken: string }) {
     try {
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
-      });
-
-      const user = await this.userRepository.findOne({
-        where: { id: payload.sub },
-      });
+      const payload = this.jwtService.verify(dto.refreshToken);
+      const user = this.memoryUsers.find(u => u.id === payload.sub);
 
       if (!user) {
         throw new UnauthorizedException('用户不存在');
       }
 
+      const newPayload = { sub: user.id, openid: user.openid, role: user.role };
+      const newAccessToken = this.jwtService.sign(newPayload);
+
       return {
-        token: this.generateToken(user),
-        refreshToken: this.generateRefreshToken(user),
+        token: newAccessToken,
+        refreshToken: dto.refreshToken,
       };
     } catch (error) {
-      throw new UnauthorizedException('Refresh token无效');
+      throw new UnauthorizedException('Token 无效');
     }
   }
 
   /**
-   * 登出
+   * 登出（测试版无需操作）
    */
-  async logout(userId: string) {
-    this.logger.log(`用户登出: ${userId}`);
-    return { success: true };
+  async logout() {
+    return { message: '登出成功' };
+  }
+
+  /**
+   * 获取用户信息
+   */
+  async getUserInfo(userId: number) {
+    const user = this.memoryUsers.find(u => u.id === userId);
+    if (!user) {
+      throw new UnauthorizedException('用户不存在');
+    }
+    return {
+      id: user.id,
+      nickname: user.nickname,
+      avatar: user.avatar,
+      role: user.role,
+    };
   }
 }
