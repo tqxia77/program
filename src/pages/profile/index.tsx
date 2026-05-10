@@ -1,12 +1,13 @@
 /**
  * 银龄乐圈 - 个人中心
- * 展示用户信息，支持报名管理、动态管理、资料编辑
+ * 对接后端API：用户资料、我的报名、我的帖子
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
-import { Calendar, Settings, Users, MessageCircle, Type, Bell, ChevronRight, Heart, Pencil, X, CalendarPlus, UserPlus, UserCheck } from 'lucide-react-taro'
+import { Calendar, Settings, Users, MessageCircle, Bell, ChevronRight, Heart, Pencil, X, CalendarPlus, UserPlus, UserCheck } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
+import { Network } from '@/network'
 import { 
   getUserProfile, 
   getSignedActivities, 
@@ -15,9 +16,9 @@ import {
   deleteUserPost,
   type Activity, 
   type Post 
-} from '../../store/mock-data'
-import { useFontMode } from '../../store/font-mode'
-import { SafeImage } from '../../components/safe-image'
+} from '@/store/mock-data'
+import { useFontMode } from '@/store/font-mode'
+import { SafeImage } from '@/components/safe-image'
 
 export default function Profile() {
   const [userName, setUserName] = useState('银龄用户')
@@ -30,17 +31,81 @@ export default function Profile() {
   const { toggleFontMode, isLargeMode, fontMode } = useFontMode()
   const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
 
-  // 加载用户数据和报名记录
-  const loadUserData = useCallback(() => {
-    const user = getUserProfile()
-    setUserName(user.name)
-    setUserAvatar(user.avatar)
-
-    const signed = getSignedActivities()
-    setSignedActivities(signed)
-
-    const posts = getUserPosts()
-    setUserPosts(posts)
+  // 加载用户数据 - 对接后端API
+  const loadUserData = useCallback(async () => {
+    // 1. 获取用户资料
+    try {
+      const profileRes = await Network.request({
+        url: '/api/user/profile',
+        method: 'GET'
+      })
+      
+      if (profileRes.data.code === 200 && profileRes.data.data) {
+        const userData = profileRes.data.data
+        setUserName(userData.nickname || userData.name || '用户')
+        setUserAvatar(userData.avatar || '')
+      }
+    } catch (e) {
+      console.log('获取用户资料API失败，使用Mock数据')
+      const user = getUserProfile()
+      setUserName(user.name)
+      setUserAvatar(user.avatar)
+    }
+    
+    // 2. 获取我的报名
+    try {
+      const activitiesRes = await Network.request({
+        url: '/api/user/activities',
+        method: 'GET'
+      })
+      
+      if (activitiesRes.data.code === 200 && activitiesRes.data.data) {
+        const data = activitiesRes.data.data
+        const activities = Array.isArray(data) ? data : (data.list || [])
+        
+        setSignedActivities(activities.map((a: any) => ({
+          id: a.id,
+          title: a.title || a.activity?.title || '',
+          date: a.activity?.date || a.date || '',
+          time: a.activity?.time || a.time || '',
+          location: a.activity?.location || a.location || '',
+          imageUrl: a.activity?.imageUrl || a.imageUrl || '',
+          category: a.activity?.category || a.category || '',
+          status: a.status || 'registered'
+        })))
+      }
+    } catch (e) {
+      console.log('获取我的报名API失败，使用Mock数据')
+      setSignedActivities(getSignedActivities())
+    }
+    
+    // 3. 获取我的帖子
+    try {
+      const postsRes = await Network.request({
+        url: '/api/user/posts',
+        method: 'GET'
+      })
+      
+      if (postsRes.data.code === 200 && postsRes.data.data) {
+        const data = postsRes.data.data
+        const posts = Array.isArray(data) ? data : (data.list || [])
+        
+        setUserPosts(posts.map((p: any) => ({
+          id: p.id,
+          userId: p.userId,
+          userName: p.author?.nickname || p.userName || '用户',
+          userAvatar: p.author?.avatar || p.userAvatar || '',
+          content: p.content,
+          images: p.images || [],
+          likes: p.likeCount || p.likes || 0,
+          comments: p.commentCount || p.comments || 0,
+          publishTime: p.createdAt || p.publishTime || ''
+        })))
+      }
+    } catch (e) {
+      console.log('获取我的帖子API失败，使用Mock数据')
+      setUserPosts(getUserPosts())
+    }
   }, [])
 
   useEffect(() => {
@@ -60,45 +125,85 @@ export default function Profile() {
     setShowMyPosts(prev => !prev)
   }
 
-  // 取消报名
-  const handleCancelSignUp = (activityId: string, e: any) => {
+  // 取消报名 - 对接后端API
+  const handleCancelSignUp = async (activityId: string, e: any) => {
     e.stopPropagation()
+    
     Taro.showModal({
       title: '取消报名',
       content: '确定要取消报名吗？',
       confirmText: '确定取消',
       cancelText: '保留报名',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
+          // 先更新UI
           removeSignedActivityId(activityId)
-          loadUserData()
-          Taro.showToast({
-            title: '已取消报名',
-            icon: 'success',
-            duration: 1500
-          })
+          setSignedActivities(prev => prev.filter(a => a.id !== activityId))
+          
+          try {
+            // 调用后端API
+            await Network.request({
+              url: `/api/activities/${activityId}/cancel`,
+              method: 'POST'
+            })
+            
+            Taro.showToast({
+              title: '已取消报名',
+              icon: 'success',
+              duration: 1500
+            })
+          } catch (error) {
+            console.log('取消报名API失败')
+            // 回滚数据
+            loadUserData()
+            Taro.showToast({
+              title: '取消失败',
+              icon: 'error',
+              duration: 1500
+            })
+          }
         }
       }
     })
   }
 
-  // 删除动态
-  const handleDeletePost = (postId: string, e: any) => {
+  // 删除动态 - 对接后端API
+  const handleDeletePost = async (postId: string, e: any) => {
     e.stopPropagation()
+    
     Taro.showModal({
       title: '删除动态',
       content: '确定要删除这条动态吗？',
       confirmText: '删除',
       cancelText: '取消',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
+          // 先更新UI
           deleteUserPost(postId)
-          loadUserData()
-          Taro.showToast({
-            title: '已删除',
-            icon: 'success',
-            duration: 1500
-          })
+          setUserPosts(prev => prev.filter(p => p.id !== postId))
+          
+          try {
+            // 调用后端API
+            await Network.request({
+              url: `/api/posts/${postId}`,
+              method: 'DELETE'
+            })
+            
+            Taro.showToast({
+              title: '已删除',
+              icon: 'success',
+              duration: 1500
+            })
+          } catch (error) {
+            console.log('删除帖子API失败')
+            // 回滚数据
+            loadUserData()
+            Taro.showToast({
+              title: '删除失败',
+              icon: 'error',
+              duration: 1500
+            })
+          }
         }
       }
     })
@@ -175,7 +280,6 @@ export default function Profile() {
               className="w-28 h-28 rounded-full"
               mode="aspectFill"
             />
-
           </View>
           <View className="ml-4 flex-1">
             <Text className="block text-3xl font-bold text-white">{userName}</Text>
@@ -293,7 +397,7 @@ export default function Profile() {
                         <Text className="block text-base text-foreground leading-relaxed mb-2">
                           {post.content}
                         </Text>
-                        {post.images.length > 0 && (
+                        {post.images && post.images.length > 0 && (
                           <View className="flex gap-2 flex-wrap mb-2">
                             {post.images.map((img, index) => (
                               <SafeImage
@@ -417,52 +521,27 @@ export default function Profile() {
             onClick={handleFontSizeAdjust}
           >
             <View className="flex items-center gap-4">
-              <View className={`w-14 h-14 rounded-full flex items-center justify-center ${isLargeMode() ? 'bg-primary' : 'bg-secondary'}`}>
-                <Type color={isLargeMode() ? '#FFFFFF' : '#FF6B00'} size={26} />
+              <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                <Text className="block text-2xl">Aa</Text>
               </View>
               <View>
                 <Text className="block text-xl text-foreground">字体大小</Text>
                 <Text className="block text-base text-muted-foreground mt-1">
-                  {isLargeMode() ? '当前：大字体模式' : '当前：默认模式'}
+                  {fontMode === 'large' ? '大字体模式' : '默认模式'}
                 </Text>
               </View>
             </View>
-            <View className="flex items-center">
-              <View className={`px-4 py-2 rounded-full mr-2 ${isLargeMode() ? 'bg-primary' : 'bg-secondary'}`}>
-                <Text className={`block text-lg font-medium ${isLargeMode() ? 'text-white' : 'text-foreground'}`}>
-                  {isLargeMode() ? '大' : '标准'}
-                </Text>
-              </View>
-              <ChevronRight color="#999999" size={24} />
-            </View>
-          </View>
-
-          <View className="h-px bg-border mx-5" />
-
-          <View className="flex items-center justify-between px-5 py-5">
-            <View className="flex items-center gap-4">
-              <View className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
-                <Bell color="#FF6B00" size={24} />
-              </View>
-              <View>
-                <Text className="block text-xl text-foreground">消息通知</Text>
-                <Text className="block text-base text-muted-foreground mt-1">活动报名、活动提醒</Text>
-              </View>
-            </View>
-            <View className="bg-primary rounded-full px-4 py-2">
-              <Text className="block text-white text-base font-medium">已开启</Text>
-            </View>
+            <ChevronRight color="#999999" size={24} />
           </View>
         </View>
       </View>
 
       {/* 版本信息 */}
-      <View className="mt-10 flex justify-center">
-        <Text className="block text-base text-muted-foreground">银龄乐圈 v1.0.0</Text>
+      <View className="px-4 mt-8 pb-8">
+        <Text className="block text-center text-base text-muted-foreground">
+          银龄乐圈 v1.0.0
+        </Text>
       </View>
-
-      {/* 底部留白 */}
-      <View className="h-20" />
     </View>
   )
 }

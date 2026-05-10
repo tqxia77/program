@@ -1,18 +1,19 @@
 /**
  * 银龄乐圈 - 帖子详情页面
- * 展示帖子完整内容和互动功能
+ * 对接后端API：帖子详情、点赞、评论、关注
  */
 
 import { useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { Input } from '@/components/ui/input'
 import { SafeImage } from '@/components/safe-image'
-import { TTSButton } from '@/components/tts'
+import { TTSPlayer } from '@/components/tts'
 import { VoiceComment } from '@/components/voice'
 import { Heart, MessageCircle, Share2, ChevronLeft, Send, UserPlus, UserCheck } from 'lucide-react-taro'
 import { useFontMode } from '@/store/font-mode'
 import Taro from '@tarojs/taro'
-import { getPosts, getUserProfile, getLikedPostIds, saveLikedPostId, removeLikedPostId } from '@/store/mock-data'
+import { Network } from '@/network'
+import { getPosts, getLikedPostIds, getUserProfile } from '@/store/mock-data'
 
 interface Comment {
   id: string
@@ -20,8 +21,8 @@ interface Comment {
   userName: string
   userAvatar: string
   content: string
-  voiceText?: string  // 语音转文字内容
-  isVoice?: boolean   // 是否为语音输入
+  voiceText?: string
+  isVoice?: boolean
   createTime: string
 }
 
@@ -43,46 +44,146 @@ export default function PostDetail() {
   const [likedIds, setLikedIds] = useState<string[]>([])
   const [commentText, setCommentText] = useState('')
   const [isFollowing, setIsFollowing] = useState(false)
+  const [loading, setLoading] = useState(true)
   const { fontMode } = useFontMode()
   const fontModeClass = fontMode === 'large' ? 'font-mode-large' : 'font-mode-normal'
   const currentUser = getUserProfile()
 
+  // 格式化时间
+  const formatTime = (dateStr: string) => {
+    if (!dateStr) return '刚刚'
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    
+    if (diff < 60000) return '刚刚'
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
+    if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
+    return date.toLocaleDateString()
+  }
+
   useEffect(() => {
     // 获取帖子ID
-    const event = Taro.getStorageSync('currentPost') || {}
-    if (event.id) {
-      const posts = getPosts()
-      const foundPost = posts.find(p => p.id === event.id)
-      if (foundPost) {
-        setPost(foundPost)
+    const id = Taro.getStorageSync('currentPostId')
+    
+    const loadPostData = async () => {
+      setLoading(true)
+      
+      if (id) {
+        try {
+          // 调用后端API获取帖子详情
+          const res = await Network.request({
+            url: `/api/posts/${id}`,
+            method: 'GET'
+          })
+          
+          console.log('帖子详情API响应:', res.data)
+          
+          if (res.data.code === 200 && res.data.data) {
+            const postData = res.data.data
+            const formattedPost: Post = {
+              id: postData.id,
+              userId: postData.userId,
+              userName: postData.author?.nickname || postData.userName || '用户',
+              userAvatar: postData.author?.avatar || postData.userAvatar || '',
+              content: postData.content,
+              images: postData.images || [],
+              likes: postData.likeCount || 0,
+              comments: postData.commentCount || 0,
+              publishTime: formatTime(postData.createdAt)
+            }
+            setPost(formattedPost)
+            
+            // 获取评论列表
+            try {
+              const commentsRes = await Network.request({
+                url: `/api/posts/${id}/comments`,
+                method: 'GET'
+              })
+              
+              if (commentsRes.data.code === 200 && commentsRes.data.data) {
+                const commentList = Array.isArray(commentsRes.data.data) 
+                  ? commentsRes.data.data 
+                  : commentsRes.data.data.list || []
+                
+                setComments(commentList.map((c: any) => ({
+                  id: c.id,
+                  userId: c.userId,
+                  userName: c.author?.nickname || c.userName || '用户',
+                  userAvatar: c.author?.avatar || c.userAvatar || '',
+                  content: c.content || '',
+                  voiceText: c.voiceText,
+                  isVoice: !!c.voiceText,
+                  createTime: formatTime(c.createdAt)
+                })))
+              }
+            } catch (e) {
+              console.log('获取评论列表失败')
+            }
+          }
+        } catch (error) {
+          console.log('帖子详情API失败，使用Mock数据:', error)
+          // 降级到Mock数据
+          const posts = getPosts()
+          const foundPost = posts.find(p => p.id === id)
+          if (foundPost) {
+            setPost(foundPost)
+          }
+        }
+      } else {
+        // 从URL参数获取
+        const pages = Taro.getCurrentPages()
+        const currentPage = pages[pages.length - 1]
+        const postId = (currentPage as any).options?.id || id
+        
+        if (postId) {
+          try {
+            const res = await Network.request({
+              url: `/api/posts/${postId}`,
+              method: 'GET'
+            })
+            
+            if (res.data.code === 200 && res.data.data) {
+              const postData = res.data.data
+              setPost({
+                id: postData.id,
+                userId: postData.userId,
+                userName: postData.author?.nickname || '用户',
+                userAvatar: postData.author?.avatar || '',
+                content: postData.content,
+                images: postData.images || [],
+                likes: postData.likeCount || 0,
+                comments: postData.commentCount || 0,
+                publishTime: formatTime(postData.createdAt)
+              })
+            }
+          } catch (error) {
+            console.log('帖子详情API失败')
+          }
+        }
       }
+      
+      // 加载点赞状态
+      try {
+        const likeRes = await Network.request({
+          url: '/api/user/likes',
+          method: 'GET'
+        })
+        if (likeRes.data.code === 200 && likeRes.data.data) {
+          const likedList = Array.isArray(likeRes.data.data) 
+            ? likeRes.data.data 
+            : likeRes.data.data.list || []
+          setLikedIds(likedList.map((p: any) => p.id))
+        }
+      } catch (e) {
+        setLikedIds(getLikedPostIds())
+      }
+      
+      setLoading(false)
     }
     
-    // 加载点赞状态
-    setLikedIds(getLikedPostIds())
-    
-    // 模拟评论数据
-    const mockComments: Comment[] = [
-      {
-        id: '1',
-        userId: 'user2',
-        userName: '李阿姨',
-        userAvatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80',
-        content: '这个活动太好了，我也想参加！',
-        createTime: '2小时前',
-      },
-      {
-        id: '2',
-        userId: 'user3',
-        userName: '王建国',
-        userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-        content: '',
-        voiceText: '报名了报名了，明天见！',
-        isVoice: true,
-        createTime: '1小时前',
-      },
-    ]
-    setComments(mockComments)
+    loadPostData()
   }, [])
 
   // 返回
@@ -90,79 +191,150 @@ export default function PostDetail() {
     Taro.navigateBack()
   }
 
-  // 点赞
-  const handleLike = () => {
+  // 点赞 - 对接后端API
+  const handleLike = async () => {
     if (!post) return
     
-    let newLikedIds: string[]
-    if (likedIds.includes(post.id)) {
-      newLikedIds = removeLikedPostId(post.id)
-    } else {
-      newLikedIds = saveLikedPostId(post.id)
-    }
-    setLikedIds(newLikedIds)
+    const isCurrentlyLiked = likedIds.includes(post.id)
     
-    // 更新帖子点赞数
+    // 先更新UI
+    setLikedIds(prev => 
+      isCurrentlyLiked 
+        ? prev.filter(id => id !== post.id)
+        : [...prev, post.id]
+    )
     setPost({
       ...post,
-      likes: likedIds.includes(post.id) ? post.likes - 1 : post.likes + 1,
+      likes: isCurrentlyLiked ? post.likes - 1 : post.likes + 1,
     })
-  }
-
-  // 关注
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing)
-    Taro.showToast({
-      title: isFollowing ? '已取消关注' : '关注成功',
-      icon: 'success',
-    })
-  }
-
-  // 发送评论
-  const handleSendComment = () => {
-    if (!commentText.trim()) return
     
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      content: commentText,
-      createTime: '刚刚',
-    }
-    
-    setComments([...comments, newComment])
-    setCommentText('')
-    
-    // 更新评论数
-    if (post) {
+    try {
+      // 调用后端API
+      if (isCurrentlyLiked) {
+        await Network.request({
+          url: `/api/posts/${post.id}/like`,
+          method: 'DELETE'
+        })
+      } else {
+        await Network.request({
+          url: `/api/posts/${post.id}/like`,
+          method: 'POST'
+        })
+      }
+    } catch (error) {
+      console.log('点赞API失败，回滚状态')
+      setLikedIds(prev => 
+        isCurrentlyLiked 
+          ? [...prev, post.id]
+          : prev.filter(id => id !== post.id)
+      )
       setPost({
         ...post,
-        comments: post.comments + 1,
+        likes: isCurrentlyLiked ? post.likes + 1 : post.likes - 1,
       })
     }
   }
 
-  // 处理语音评论
-  const handleVoiceComment = (text: string) => {
-    const newComment: Comment = {
-      id: Date.now().toString(),
+  // 关注 - 对接后端API
+  const handleFollow = async () => {
+    if (!post) return
+    
+    const newFollowingState = !isFollowing
+    
+    // 先更新UI
+    setIsFollowing(newFollowingState)
+    
+    try {
+      // 调用后端API
+      if (newFollowingState) {
+        await Network.request({
+          url: `/api/users/${post.userId}/follow`,
+          method: 'POST'
+        })
+        Taro.showToast({ title: '关注成功', icon: 'success' })
+      } else {
+        await Network.request({
+          url: `/api/users/${post.userId}/follow`,
+          method: 'DELETE'
+        })
+        Taro.showToast({ title: '已取消关注', icon: 'success' })
+      }
+    } catch (error) {
+      console.log('关注API失败，回滚状态')
+      setIsFollowing(!newFollowingState)
+      Taro.showToast({ title: '操作失败', icon: 'error' })
+    }
+  }
+
+  // 发送评论 - 对接后端API
+  const handleSendComment = async () => {
+    if (!commentText.trim() || !post) return
+    
+    const tempComment: Comment = {
+      id: `temp_${Date.now()}`,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatar,
+      content: commentText.trim(),
+      createTime: '刚刚'
+    }
+    
+    // 先显示到UI
+    setComments([...comments, tempComment])
+    setCommentText('')
+    setPost({
+      ...post,
+      comments: post.comments + 1,
+    })
+    
+    try {
+      // 调用后端API
+      await Network.request({
+        url: `/api/posts/${post.id}/comments`,
+        method: 'POST',
+        data: { content: commentText.trim() }
+      })
+      
+      Taro.showToast({ title: '评论成功', icon: 'success' })
+    } catch (error) {
+      console.log('评论API失败')
+      Taro.showToast({ title: '评论失败', icon: 'error' })
+    }
+  }
+
+  // 处理语音评论 - 对接后端API
+  const handleVoiceComment = async (text: string) => {
+    if (!post) return
+    
+    const tempComment: Comment = {
+      id: `temp_${Date.now()}`,
       userId: currentUser.id,
       userName: currentUser.name,
       userAvatar: currentUser.avatar,
       content: '',
       voiceText: text,
       isVoice: true,
-      createTime: '刚刚',
+      createTime: '刚刚'
     }
     
-    setComments([...comments, newComment])
+    // 先显示到UI
+    setComments([...comments, tempComment])
+    setPost({
+      ...post,
+      comments: post.comments + 1,
+    })
     
-    if (post) {
-      setPost({
-        ...post,
-        comments: post.comments + 1,
+    try {
+      // 调用后端API
+      await Network.request({
+        url: `/api/posts/${post.id}/comments`,
+        method: 'POST',
+        data: { content: '', voiceText: text }
       })
+      
+      Taro.showToast({ title: '评论成功', icon: 'success' })
+    } catch (error) {
+      console.log('语音评论API失败')
     }
   }
 
@@ -173,10 +345,18 @@ export default function PostDetail() {
     })
   }
 
-  if (!post) {
+  if (loading) {
     return (
       <View className={`min-h-screen bg-background flex items-center justify-center ${fontModeClass}`}>
         <Text className="block text-lg text-muted-foreground">加载中...</Text>
+      </View>
+    )
+  }
+
+  if (!post) {
+    return (
+      <View className={`min-h-screen bg-background flex items-center justify-center ${fontModeClass}`}>
+        <Text className="block text-lg text-muted-foreground">帖子不存在</Text>
       </View>
     )
   }
@@ -234,12 +414,12 @@ export default function PostDetail() {
               {post.content}
             </Text>
             {/* 听帖子按钮 */}
-            <TTSButton text={post.content} />
+            <TTSPlayer text={post.content} />
           </View>
         </View>
 
         {/* 图片 */}
-        {post.images.length > 0 && (
+        {post.images && post.images.length > 0 && (
           <View className="bg-white px-5 pb-5">
             <View className={post.images.length === 1 ? '' : 'grid grid-cols-2 gap-2'}>
               {post.images.map((img, index) => (
@@ -266,7 +446,6 @@ export default function PostDetail() {
                 <Heart 
                   color={likedIds.includes(post.id) ? '#EF4444' : '#666666'} 
                   size={24}
-                  filled={likedIds.includes(post.id)}
                 />
                 <Text className={`block text-lg font-medium ${likedIds.includes(post.id) ? 'text-red-500' : 'text-foreground'}`}>
                   {post.likes}
@@ -295,38 +474,44 @@ export default function PostDetail() {
         <View className="mt-4 px-4">
           <Text className="block text-xl font-bold text-foreground mb-4 px-2">评论 ({comments.length})</Text>
           
-          {comments.map((comment) => (
-            <View key={comment.id} className="bg-white rounded-2xl p-5 mb-4">
-              <View className="flex items-start">
-                <SafeImage
-                  src={comment.userAvatar}
-                  className="w-12 h-12 rounded-full"
-                  mode="aspectFill"
-                />
-                <View className="ml-3 flex-1">
-                  <View className="flex items-center justify-between">
-                    <Text className="block text-lg font-bold text-foreground">{comment.userName}</Text>
-                    <Text className="block text-sm text-muted-foreground">{comment.createTime}</Text>
-                  </View>
-                  
-                  {/* 评论内容 */}
-                  {comment.isVoice && comment.voiceText ? (
-                    <View className="mt-2 bg-blue-50 rounded-xl p-4">
-                      <Text className="block text-base text-blue-700 italic">{`"${comment.voiceText}"`}</Text>
-                      <View className="mt-2 flex items-center gap-2">
-                        <View className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-                        <Text className="block text-sm text-blue-500">语音输入</Text>
-                      </View>
+          {comments.length === 0 ? (
+            <View className="bg-white rounded-2xl p-10 text-center">
+              <Text className="block text-base text-muted-foreground">暂无评论，快来抢沙发吧</Text>
+            </View>
+          ) : (
+            comments.map((comment) => (
+              <View key={comment.id} className="bg-white rounded-2xl p-5 mb-4">
+                <View className="flex items-start">
+                  <SafeImage
+                    src={comment.userAvatar}
+                    className="w-12 h-12 rounded-full"
+                    mode="aspectFill"
+                  />
+                  <View className="ml-3 flex-1">
+                    <View className="flex items-center justify-between">
+                      <Text className="block text-lg font-bold text-foreground">{comment.userName}</Text>
+                      <Text className="block text-sm text-muted-foreground">{comment.createTime}</Text>
                     </View>
-                  ) : (
-                    <Text className="block text-base text-foreground mt-2 leading-relaxed">
-                      {comment.content}
-                    </Text>
-                  )}
+                    
+                    {/* 评论内容 */}
+                    {comment.isVoice && comment.voiceText ? (
+                      <View className="mt-2 bg-blue-50 rounded-xl p-4">
+                        <Text className="block text-base text-blue-700 italic">{`"${comment.voiceText}"`}</Text>
+                        <View className="mt-2 flex items-center gap-2">
+                          <View className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                          <Text className="block text-sm text-blue-500">语音输入</Text>
+                        </View>
+                      </View>
+                    ) : (
+                      <Text className="block text-base text-foreground mt-2 leading-relaxed">
+                        {comment.content}
+                      </Text>
+                    )}
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </ScrollView>
 
@@ -338,7 +523,7 @@ export default function PostDetail() {
               className="flex-1 text-base bg-transparent"
               placeholder="写评论..."
               value={commentText}
-              onInput={(e) => setCommentText(e.detail.value)}
+              onInput={(e: any) => setCommentText(e.detail.value)}
               onConfirm={handleSendComment}
             />
             {/* 语音评论 */}

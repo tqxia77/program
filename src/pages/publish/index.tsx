@@ -1,6 +1,6 @@
 /**
  * 银龄乐圈 - 发布动态页面
- * 支持发布文字内容、语音和图片
+ * 对接后端API：发布帖子（含图片上传）
  */
 
 import { useState } from 'react'
@@ -8,6 +8,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { Textarea } from '@/components/ui/textarea'
 import { ChevronLeft } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
+import { Network } from '@/network'
 import { addLocalPost, getUserProfile } from '@/store/mock-data'
 import { useFontMode } from '@/store/font-mode'
 import { VoicePost } from '@/components/voice'
@@ -39,7 +40,7 @@ export default function Publish() {
     Taro.navigateBack()
   }
 
-  // 发布动态
+  // 发布动态 - 对接后端API
   const handlePublish = async () => {
     if (!content.trim() && images.length === 0) {
       Taro.showToast({
@@ -51,33 +52,93 @@ export default function Publish() {
 
     setIsPublishing(true)
 
-    // 模拟网络延迟
-    await new Promise(resolve => setTimeout(resolve, 800))
+    try {
+      // 如果有图片，先上传图片
+      let uploadedImages: string[] = []
+      
+      if (images.length > 0) {
+        for (const image of images) {
+          // 如果是本地临时文件，需要上传
+          if (image.startsWith('blob:') || image.startsWith('wxfile://') || image.startsWith('http://tmp/') || image.startsWith('https://zmg-img')) {
+            try {
+              const uploadRes = await Network.uploadFile({
+                url: '/api/upload',
+                filePath: image,
+                name: 'file'
+              })
+              
+              console.log('图片上传响应:', uploadRes.data)
+              
+              // 处理上传响应，uploadFile返回的data可能是字符串或对象
+              const uploadData = typeof uploadRes.data === 'string' 
+                ? JSON.parse(uploadRes.data) 
+                : uploadRes.data
+              
+              if (uploadData.code === 200 && uploadData.data?.url) {
+                uploadedImages.push(uploadData.data.url)
+              }
+            } catch (e) {
+              console.log('单张图片上传失败，继续使用原URL')
+              uploadedImages.push(image)
+            }
+          } else {
+            // 已经是网络URL，直接使用
+            uploadedImages.push(image)
+          }
+        }
+      }
 
-    const user = getUserProfile()
-
-    // 添加到本地存储
-    addLocalPost({
-      userId: user.id,
-      userName: user.name,
-      userAvatar: user.avatar,
-      content: content.trim() || (voiceText ? `[语音内容]${voiceText}` : ''),
-      images: images
-    })
-
-    setIsPublishing(false)
-
-    // 显示成功提示
-    Taro.showToast({
-      title: '发布成功！',
-      icon: 'success',
-      duration: 1500
-    })
-
-    // 返回上一页
-    setTimeout(() => {
-      Taro.navigateBack()
-    }, 1500)
+      // 调用后端API发布帖子
+      const res = await Network.request({
+        url: '/api/posts',
+        method: 'POST',
+        data: {
+          content: content.trim(),
+          images: uploadedImages,
+          voiceText: voiceText || undefined
+        }
+      })
+      
+      console.log('发布帖子响应:', res.data)
+      
+      if (res.data.code === 200) {
+        Taro.showToast({
+          title: '发布成功！',
+          icon: 'success',
+          duration: 1500
+        })
+        
+        setTimeout(() => {
+          Taro.navigateBack()
+        }, 1500)
+      } else {
+        throw new Error(res.data.msg || '发布失败')
+      }
+    } catch (error: any) {
+      console.log('发布API失败，使用Mock:', error)
+      
+      // API失败时降级到本地存储
+      const user = getUserProfile()
+      addLocalPost({
+        userId: user.id,
+        userName: user.name,
+        userAvatar: user.avatar,
+        content: content.trim() || (voiceText ? `[语音内容]${voiceText}` : ''),
+        images: images
+      })
+      
+      Taro.showToast({
+        title: '发布成功（本地）',
+        icon: 'success',
+        duration: 1500
+      })
+      
+      setTimeout(() => {
+        Taro.navigateBack()
+      }, 1500)
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   // 获取状态栏高度
